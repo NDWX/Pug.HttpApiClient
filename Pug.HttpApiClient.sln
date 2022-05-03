@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pug.HttpApiClient", "Pug.HttpApiClient\Pug.HttpApiClient.csproj", "{37F48F83-47E9-4D18-ABFE-BF34F1C5DFFB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pug.HttpApiClient.OAuth2", "Pug.HttpApiClient.OAuth2\Pug.HttpApiClient.OAuth2.csproj", "{837284DC-EE02-4A93-8934-E43D4CF0767D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pug.HttpApiClient.Common", "Pug.HttpApiClient.Common\Pug.HttpApiClient.Common.csproj", "{695AA373-79DE-4E9B-80E2-3713F4780DAA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{37F48F83-47E9-4D18-ABFE-BF34F1C5DFFB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{37F48F83-47E9-4D18-ABFE-BF34F1C5DFFB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{37F48F83-47E9-4D18-ABFE-BF34F1C5DFFB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{37F48F83-47E9-4D18-ABFE-BF34F1C5DFFB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{837284DC-EE02-4A93-8934-E43D4CF0767D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{837284DC-EE02-4A93-8934-E43D4CF0767D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{837284DC-EE02-4A93-8934-E43D4CF0767D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{837284DC-EE02-4A93-8934-E43D4CF0767D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{695AA373-79DE-4E9B-80E2-3713F4780DAA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{695AA373-79DE-4E9B-80E2-3713F4780DAA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{695AA373-79DE-4E9B-80E2-3713F4780DAA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{695AA373-79DE-4E9B-80E2-3713F4780DAA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
