@@ -26,14 +26,18 @@ namespace Pug.HttpApiClient
 		{
 			BaseUrl = baseUrl ?? throw new ArgumentNullException( nameof(baseUrl) );
 
-			BaseAddress = new Uri( baseUrl.ToString().Replace( baseUrl.AbsolutePath, string.Empty ) );
+			if( baseUrl.AbsolutePath != "/")
+				BaseAddress = new Uri( baseUrl.ToString().Replace( baseUrl.AbsolutePath, string.Empty ) );
+			else
+				BaseAddress = new Uri( baseUrl.ToString() );
+			
 			_httpClientFactory = httpClientFactory ?? throw new ArgumentNullException( nameof(httpClientFactory) );
 			_clientDecorators = clientDecorators ?? Array.Empty<IHttpClientDecorator>();
 			_messageDecorators = messageDecorators ?? Array.Empty<IHttpRequestMessageDecorator>();
 			BasePath = baseUrl.AbsolutePath;
 		}
 
-		public HttpApiClient( string baseUrl, IHttpClientFactory httpClientFactory, IEnumerable<IHttpClientDecorator> clientDecorators,
+		public HttpApiClient( string baseUrl, IHttpClientFactory httpClientFactory, IEnumerable<IHttpClientDecorator> clientDecorators = null,
 							IEnumerable<IHttpRequestMessageDecorator> messageDecorators = null )
 			: this( new Uri( baseUrl ), httpClientFactory, clientDecorators, messageDecorators )
 		{
@@ -66,9 +70,9 @@ namespace Pug.HttpApiClient
 
 		private Uri ConstructRequestPath( string path, IEnumerable<KeyValuePair<string, string>> queries )
 		{
-			UriBuilder uriBuilder = new UriBuilder( BaseAddress )
+			UriBuilder uriBuilder = new ( BaseAddress )
 			{
-				Path = path,
+				Path = string.IsNullOrWhiteSpace( path )? BaseUrl.AbsolutePath : $"{BaseUrl.AbsolutePath.Trim( '/' )}/{ path.TrimStart('/') }",
 				Query = queries?.Select( x => $"{WebUtility.UrlEncode( x.Key )}={WebUtility.UrlEncode( x.Value )}" )
 								.Aggregate( ( x, y ) => $"{x}&{y}" ) ?? string.Empty
 			};
@@ -99,7 +103,7 @@ namespace Pug.HttpApiClient
 
 			foreach( IHttpRequestMessageDecorator messageDecorator in _messageDecorators )
 			{
-				MessageDecorationContext messageDecorationContext = new MessageDecorationContext( requestMessage.Headers );
+				MessageDecorationContext messageDecorationContext = new ( requestMessage.Headers );
 
 				await messageDecorator.DecorateAsync( messageDecorationContext ).ConfigureAwait( false );
 

@@ -22,10 +22,11 @@ namespace Pug.HttpApiClient.Json
 
 			if( response.IsSuccessStatusCode )
 			{
+				string openIdConfigurationString = await response.Content.ReadAsStringAsync();
 #if NETCOREAPP2_1
-				return JsonConvert.DeserializeObject<T>( await response.Content.ReadAsStringAsync() );
+				return JsonConvert.DeserializeObject<T>( openIdConfigurationString );
 #else
-				return JsonSerializer.Deserialize<T>( await response.Content.ReadAsStringAsync() );
+				return JsonSerializer.Deserialize<T>( openIdConfigurationString );
 #endif
 			}
 

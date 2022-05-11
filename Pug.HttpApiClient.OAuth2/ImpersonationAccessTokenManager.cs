@@ -20,8 +20,7 @@ namespace Pug.HttpApiClient.OAuth2Decorators
 		private const string GrantType = "urn:ietf:params:oauth:grant-type:token-exchange",
 							SubjectTokenType = "urn:ietf:params:oauth:token-type:access_token";
 		
-		private readonly MediaTypeWithQualityHeaderValue _jsonMediaType = new ( MediaTypeNames.Application.Json );
-		private readonly IHttpApiClient _httpApiClient;
+		private readonly MediaTypeWithQualityHeaderValue _jsonMediaType = new ( "*/*" );
 
 		public ImpersonationAccessTokenManager( string oAuth2Endpoint, string clientId, string clientSecret, string scopes, 
 												ITokenExchangeSubjectTokenSource subjectTokenSource,
@@ -48,8 +47,6 @@ namespace Pug.HttpApiClient.OAuth2Decorators
 			_clientSecret = clientSecret;
 			_scopes = scopes;
 			_subjectTokenSource = subjectTokenSource ?? throw new ArgumentNullException( nameof(subjectTokenSource) );
-
-			_httpApiClient = new HttpApiClient( Oauth2Endpoint, HttpClientFactory);
 		}
 
 		protected override AccessToken GetNewAccessToken()
@@ -60,8 +57,10 @@ namespace Pug.HttpApiClient.OAuth2Decorators
 
 			try
 			{
+				IHttpApiClient httpApiClient = new HttpApiClient( openIdConfiguration.TokenEnndpoint, HttpClientFactory);
+				
 				responseMessage =
-					_httpApiClient.PostAsync( new Uri( openIdConfiguration.TokenEnndpoint ).PathAndQuery, new FormUrlEncodedContent(
+					httpApiClient.PostAsync( string.Empty, new FormUrlEncodedContent(
 													new Dictionary<string, string>
 													{
 														["grant_type"] = GrantType,
@@ -122,8 +121,10 @@ namespace Pug.HttpApiClient.OAuth2Decorators
 
 			try
 			{
+				IHttpApiClient httpApiClient = new HttpApiClient( openIdConfiguration.TokenEnndpoint, HttpClientFactory);
+				
 				responseMessage =
-					await _httpApiClient.PostAsync( new Uri( openIdConfiguration.TokenEnndpoint ).PathAndQuery, new FormUrlEncodedContent(
+					await httpApiClient.PostAsync( string.Empty, new FormUrlEncodedContent(
 															new Dictionary<string, string>
 															{
 																["grant_type"] = GrantType,

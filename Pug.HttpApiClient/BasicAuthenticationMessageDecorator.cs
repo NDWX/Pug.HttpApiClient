@@ -8,7 +8,7 @@ namespace Pug.HttpApiClient
 	public sealed class BasicAuthenticationMessageDecorator : AuthorizationHeaderDecorator
 	{
 		public BasicAuthenticationMessageDecorator( string username, string password )
-		: base("BASIC", Convert.ToBase64String( Encoding.UTF8.GetBytes( $"{username}:{password}" ) ) )
+			: base( "Basic", Helpers.HttpBase64Encode( $"{username}:{password}" ) )
 		{
 		}
 	}

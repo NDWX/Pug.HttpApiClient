@@ -13,9 +13,8 @@ namespace Pug.HttpApiClient.OAuth2Decorators
 	internal sealed class ClientAccessTokenManager : AccessTokenManager<ClientAccessToken>, IClientAccessTokenManager
 	{
 		private readonly BasicAuthenticationMessageDecorator _clientCredentialsMessageDecorator;
-		private readonly MediaTypeWithQualityHeaderValue _jsonMediaType = new ( MediaTypeNames.Application.Json );
+		private readonly MediaTypeWithQualityHeaderValue _jsonMediaType = new ( "*/*" );
 		private readonly FormUrlEncodedContent _clientTokenRequestContent;
-		private readonly IHttpApiClient _httpApiClient;
 
 		public ClientAccessTokenManager( string oAuth2Endpoint, string clientId, string clientSecret, string scopes,
 										IHttpClientFactory httpClientFactory ) 
@@ -44,10 +43,6 @@ namespace Pug.HttpApiClient.OAuth2Decorators
 					}
 				);
 			
-			_httpApiClient = new HttpApiClient( Oauth2Endpoint,
-									HttpClientFactory,
-									messageDecorators: new[] { _clientCredentialsMessageDecorator }
-				);
 		}
 		
 		protected override ClientAccessToken GetNewAccessToken()
@@ -58,11 +53,19 @@ namespace Pug.HttpApiClient.OAuth2Decorators
 			
 			try
 			{
-				responseMessage =
-					_httpApiClient.PostAsync( new Uri( openIdConfiguration.TokenEnndpoint ).PathAndQuery, _clientTokenRequestContent, _jsonMediaType, null, null )
-								.ConfigureAwait( false )
-								.GetAwaiter()
-								.GetResult();
+				IHttpApiClient httpApiClient = new HttpApiClient(
+						openIdConfiguration.TokenEnndpoint,
+						HttpClientFactory,
+						messageDecorators: new[] { _clientCredentialsMessageDecorator }
+					);
+
+				responseMessage = httpApiClient.PostAsync(
+													string.Empty , _clientTokenRequestContent, _jsonMediaType,
+													null, null )
+
+												.ConfigureAwait( false )
+												.GetAwaiter()
+												.GetResult();
 
 			}
 			catch( TaskCanceledException )
@@ -111,8 +114,14 @@ namespace Pug.HttpApiClient.OAuth2Decorators
 			
 			try
 			{
+				IHttpApiClient httpApiClient = new HttpApiClient(
+						openIdConfiguration.TokenEnndpoint,
+						HttpClientFactory,
+						messageDecorators: new[] { _clientCredentialsMessageDecorator }
+					);
+				
 				responseMessage =
-					await _httpApiClient.PostAsync( new Uri( openIdConfiguration.TokenEnndpoint ).PathAndQuery, _clientTokenRequestContent, _jsonMediaType, null, null );
+					await httpApiClient.PostAsync( string.Empty, _clientTokenRequestContent, _jsonMediaType, null, null );
 
 			}
 			catch( TaskCanceledException )

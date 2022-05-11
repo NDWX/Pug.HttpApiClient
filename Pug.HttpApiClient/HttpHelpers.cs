@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text;
 
-namespace Pug.HttpApiClient.OAuth2Decorators
+namespace Pug.HttpApiClient
 {
 	public static class Helpers
 	{
