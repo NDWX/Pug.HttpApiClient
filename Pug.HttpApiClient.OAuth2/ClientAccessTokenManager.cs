@@ -54,7 +54,7 @@ namespace Pug.HttpApiClient.OAuth2Decorators
 			try
 			{
 				IHttpApiClient httpApiClient = new HttpApiClient(
-						openIdConfiguration.TokenEnndpoint,
+						openIdConfiguration.TokenEndpoint,
 						HttpClientFactory,
 						messageDecorators: new[] { _clientCredentialsMessageDecorator }
 					);
@@ -115,7 +115,7 @@ namespace Pug.HttpApiClient.OAuth2Decorators
 			try
 			{
 				IHttpApiClient httpApiClient = new HttpApiClient(
-						openIdConfiguration.TokenEnndpoint,
+						openIdConfiguration.TokenEndpoint,
 						HttpClientFactory,
 						messageDecorators: new[] { _clientCredentialsMessageDecorator }
 					);

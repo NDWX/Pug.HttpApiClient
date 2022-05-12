@@ -57,7 +57,7 @@ namespace Pug.HttpApiClient.OAuth2Decorators
 
 			try
 			{
-				IHttpApiClient httpApiClient = new HttpApiClient( openIdConfiguration.TokenEnndpoint, HttpClientFactory);
+				IHttpApiClient httpApiClient = new HttpApiClient( openIdConfiguration.TokenEndpoint, HttpClientFactory);
 				
 				responseMessage =
 					httpApiClient.PostAsync( string.Empty, new FormUrlEncodedContent(
@@ -121,7 +121,7 @@ namespace Pug.HttpApiClient.OAuth2Decorators
 
 			try
 			{
-				IHttpApiClient httpApiClient = new HttpApiClient( openIdConfiguration.TokenEnndpoint, HttpClientFactory);
+				IHttpApiClient httpApiClient = new HttpApiClient( openIdConfiguration.TokenEndpoint, HttpClientFactory);
 				
 				responseMessage =
 					await httpApiClient.PostAsync( string.Empty, new FormUrlEncodedContent(

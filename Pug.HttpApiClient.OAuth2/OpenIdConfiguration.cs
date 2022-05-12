@@ -27,7 +27,7 @@ namespace Pug.HttpApiClient.OAuth2Decorators
 #if !NETCOREAPP2_1
 		[JsonPropertyName( "token_endpoint")]
 #endif
-		public string TokenEnndpoint { get; set; }
+		public string TokenEndpoint { get; set; }
 		
 		[DataMember(Name="userinfo_endpoint")]
 		[JsonProperty("userinfo_endpoint")]

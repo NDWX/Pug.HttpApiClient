@@ -11,21 +11,21 @@ namespace Pug.HttpApiClient.OAuth2Decorators
 		[DataMember(Name = "access_token")]
 		[JsonProperty( "access_token")]
 #if !NETCOREAPP2_1
-		[JsonPropertyName( "token_type")]
+		[JsonPropertyName( "access_token")]
 #endif
 		public string Token { get; set; }
 
 		[DataMember(Name = "token_type")]
-		[JsonProperty( "access_token")]
+		[JsonProperty( "token_type")]
 #if !NETCOREAPP2_1
 		[JsonPropertyName( "token_type")]
 #endif
 		public string TokenType { get; set; }
 
 		[DataMember(Name = "expires_in")]
-		[JsonProperty( "access_token")]
+		[JsonProperty( "expires_in")]
 #if !NETCOREAPP2_1
-		[JsonPropertyName("token_type")]
+		[JsonPropertyName("expires_in")]
 #endif
 		public int ValidityPeriod { get; set; }
 	}
