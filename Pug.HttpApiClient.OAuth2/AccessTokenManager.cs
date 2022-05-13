@@ -54,7 +54,13 @@ namespace Pug.HttpApiClient.OAuth2Decorators
 			_accessTokenRequestSync.Wait();
 
 			if( !NewAccessTokenRequired() )
-				return _clientAccessToken;
+			{
+				TToken token = _clientAccessToken;
+				
+				_accessTokenRequestSync.Release();
+				
+				return token;
+			}
 
 			try
 			{
@@ -75,7 +81,13 @@ namespace Pug.HttpApiClient.OAuth2Decorators
 			await _accessTokenRequestSync.WaitAsync();
 
 			if( !NewAccessTokenRequired() )
-				return _clientAccessToken;
+			{
+				TToken token = _clientAccessToken;
+				
+				_accessTokenRequestSync.Release();
+				
+				return token;
+			}
 
 			try
 			{
