@@ -17,7 +17,7 @@ namespace Pug.HttpApiClient.Json
 		{
 			HttpResponseMessage response = await httpApiClient.GetAsync(
 													path, new MediaTypeWithQualityHeaderValue( MediaTypeNames.Application.Json ),
-													queries, headers
+													headers, queries
 												);
 
 			if( response.IsSuccessStatusCode )

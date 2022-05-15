@@ -55,10 +55,10 @@ namespace Pug.HttpApiClient
 				httpClient.BaseAddress = BaseAddress;
 			}
 
-			if( _clientDecorators is not null )
+			if( _clientDecorators is null )
 				return httpClient;
 
-			DecorationContext decorationContext = new DecorationContext( httpClient.DefaultRequestHeaders );
+			DecorationContext decorationContext = new ( httpClient.DefaultRequestHeaders );
 
 			foreach( IHttpClientDecorator clientDecorator in _clientDecorators )
 			{
@@ -100,7 +100,7 @@ namespace Pug.HttpApiClient
 			HttpRequestMessage requestMessage = CreateHttpRequestMessage( httpMethod, mediaType, content );
 
 			IEnumerable<KeyValuePair<string, string>> uriQueries = queries;
-
+			
 			foreach( IHttpRequestMessageDecorator messageDecorator in _messageDecorators )
 			{
 				MessageDecorationContext messageDecorationContext = new ( requestMessage.Headers );
@@ -110,6 +110,17 @@ namespace Pug.HttpApiClient
 				if( messageDecorationContext.UrlQueries is not null )
 					uriQueries = queries is null ? messageDecorationContext.UrlQueries : queries.Union( messageDecorationContext.UrlQueries );
 			}
+
+			if( headers is not null)
+				foreach( KeyValuePair<string,string> header in headers )
+				{
+					if( requestMessage.Headers.Contains( header.Key ) )
+					{
+						requestMessage.Headers.Remove( header.Key );
+					}
+
+					requestMessage.Headers.Add( header.Key, header.Value );
+				}
 
 			Uri requestUri = ConstructRequestPath( path, uriQueries );
 
