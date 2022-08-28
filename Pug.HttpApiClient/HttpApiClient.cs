@@ -83,7 +83,7 @@ namespace Pug.HttpApiClient
 		private static HttpRequestMessage CreateHttpRequestMessage( HttpMethod httpMethod, MediaTypeWithQualityHeaderValue mediaType,
 																	HttpContent content )
 		{
-			HttpRequestMessage requestMessage = new HttpRequestMessage( httpMethod, string.Empty );
+			HttpRequestMessage requestMessage = new ( httpMethod, string.Empty );
 
 			requestMessage.Content = content;
 
@@ -128,9 +128,9 @@ namespace Pug.HttpApiClient
 			return requestMessage;
 		}
 
-		private async Task<HttpResponseMessage> SendAsync( HttpMethod httpMethod, string path, IDictionary<string, string> queries,
-															IDictionary<string, string> headers, MediaTypeWithQualityHeaderValue mediaType,
-															HttpContent content = null )
+		protected virtual async Task<HttpResponseMessage> SendAsync( HttpMethod httpMethod, string path, IDictionary<string, string> queries,
+																	IDictionary<string, string> headers, MediaTypeWithQualityHeaderValue mediaType,
+																	HttpContent content = null )
 		{
 			// ReSharper disable once ConvertToUsingDeclaration
 			using( HttpClient client = await CreateHttpClientAsync() )
@@ -145,7 +145,7 @@ namespace Pug.HttpApiClient
 				switch( responseMessage.StatusCode )
 				{
 					case HttpStatusCode.Forbidden:
-						throw new Pug.Application.Security.NotAuthorized( responseMessage.ReasonPhrase );
+						throw new Application.Security.NotAuthorized( responseMessage.ReasonPhrase );
 
 					case HttpStatusCode.Gone:
 						throw new UnknownResourceException( responseMessage );
@@ -191,7 +191,7 @@ namespace Pug.HttpApiClient
 			}
 		}
 
-		public async Task<HttpResponseMessage> GetAsync( string path,
+		public virtual async Task<HttpResponseMessage> GetAsync( string path,
 														MediaTypeWithQualityHeaderValue mediaType,
 														IDictionary<string, string> headers,
 														IDictionary<string, string> queries )
@@ -199,32 +199,32 @@ namespace Pug.HttpApiClient
 			return await SendAsync( HttpMethod.Get, path, queries, headers, mediaType );
 		}
 
-		public async Task<HttpResponseMessage> PostAsync( string path, HttpContent content,
-														MediaTypeWithQualityHeaderValue mediaType, IDictionary<string, string> headers = null,
-														IDictionary<string, string> queries = null )
+		public virtual async Task<HttpResponseMessage> PostAsync( string path, HttpContent content,
+																MediaTypeWithQualityHeaderValue mediaType, IDictionary<string, string> headers = null,
+																IDictionary<string, string> queries = null )
 		{
 			return await SendAsync( HttpMethod.Post, path, queries, headers, mediaType, content );
 		}
 
-		public async Task<HttpResponseMessage> PutAsync( string path, HttpContent content,
-														MediaTypeWithQualityHeaderValue mediaType, IDictionary<string, string> headers,
-														IDictionary<string, string> queries )
+		public virtual async Task<HttpResponseMessage> PutAsync( string path, HttpContent content,
+																MediaTypeWithQualityHeaderValue mediaType, IDictionary<string, string> headers,
+																IDictionary<string, string> queries )
 		{
 			return await SendAsync( HttpMethod.Put, path, queries, headers, mediaType, content );
 		}
 
-		public async Task<HttpResponseMessage> DeleteAsync( string path,
-															IDictionary<string, string> headers = null,
-															IDictionary<string, string> queries = null,
-															MediaTypeWithQualityHeaderValue mediaType = null )
+		public virtual async Task<HttpResponseMessage> DeleteAsync( string path,
+																	IDictionary<string, string> headers = null,
+																	IDictionary<string, string> queries = null,
+																	MediaTypeWithQualityHeaderValue mediaType = null )
 		{
 			return await SendAsync( HttpMethod.Delete, path, queries, headers, mediaType );
 		}
 
-		public async Task<HttpResponseMessage> PatchAsync( string path,
-															HttpContent content,
-															MediaTypeWithQualityHeaderValue mediaType, IDictionary<string, string> headers,
-															IDictionary<string, string> queries )
+		public virtual async Task<HttpResponseMessage> PatchAsync( string path,
+																	HttpContent content,
+																	MediaTypeWithQualityHeaderValue mediaType, IDictionary<string, string> headers,
+																	IDictionary<string, string> queries )
 		{
 			return await SendAsync(HttpMethod.Patch, path, queries, headers, mediaType, content );
 		}

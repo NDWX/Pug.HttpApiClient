@@ -1,0 +1,49 @@
+name: develop - build
+
+on:
+  push:
+    branches:
+      - develop
+
+env:
+  BuildConfiguration: debug
+  Solution: Pug.HttpApiClient.sln
+  HttpApiClientProject: Pug.HttpApiClient/Pug.HttpApiClient.csproj
+  CommonProject: Pug.HttpApiClient.Common/Pug.HttpApiClient.Common.csproj
+  OAuth2HttpApiClientProject: Pug.HttpApiClient.OAuth2/Pug.HttpApiClient.OAuth2.csproj
+
+jobs:
+  build:
+    name: Build Projects
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+      
+      # Authenticates packages to push to GPR
+      - uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '3.1.x' # SDK Version to use.
+          source-url: https://nuget.pkg.github.com/Pug.Groups/index.json
+        env:
+          NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
+      - name: SonarCloud Scan
+        run: |
+          dotnet tool install --global dotnet-sonarscanner
+          dotnet sonarscanner begin /o:ndwx /k:NDWX_Pug.HttpApiClient /d:sonar.login=${{secrets.SONAR_TOKEN}}  /d:sonar.host.url=https://sonarcloud.io /d:sonar.cs.opencover.reportsPaths=**/coverage.opencover.xml
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      - name: Restore NuGet packages
+        run: dotnet restore ${{env.Solution}}
+
+      - name: Build Main project
+        run: dotnet build --nologo --no-restore --configuration ${{env.BuildConfiguration}} ${{env.OAuth2HttpApiClientProject}}
+
+      - name: End Sonar scan
+        run: dotnet sonarscanner end /d:sonar.login=${{ secrets.SONAR_TOKEN }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
