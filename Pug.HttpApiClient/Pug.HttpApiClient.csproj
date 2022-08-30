@@ -12,7 +12,6 @@
 		<FileVersion>0.4.0</FileVersion>
 		<RepositoryUrl>https://github.com/NDWX/Pug.HttpApiClient.git</RepositoryUrl>
 		<RepositoryType>Git</RepositoryType>
-		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<PackageVersion>0.4.0</PackageVersion>
 		<PackageId>Pug.HttpApiClient</PackageId>
 		<PackageTags>Pug HTTP API Client Helpers</PackageTags>

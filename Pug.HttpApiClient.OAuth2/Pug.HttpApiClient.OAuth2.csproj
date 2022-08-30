@@ -11,7 +11,6 @@
 		<FileVersion>0.2.13</FileVersion>
 		<RepositoryUrl>https://github.com/NDWX/Pug.HttpApiClient.git</RepositoryUrl>
 		<RepositoryType>Git</RepositoryType>
-		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<PackageVersion>0.2.13</PackageVersion>
 		<PackageId>Pug.HttpApiClient.OAuth2</PackageId>
 		<PackageTags>HTTP API Client OAuth2 Authentication Decorators</PackageTags>
