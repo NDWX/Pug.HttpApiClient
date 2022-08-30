@@ -34,7 +34,7 @@ namespace Pug.HttpApiClient
 			_httpClientFactory = httpClientFactory ?? throw new ArgumentNullException( nameof(httpClientFactory) );
 			_clientDecorators = clientDecorators ?? Array.Empty<IHttpClientDecorator>();
 			_messageDecorators = messageDecorators ?? Array.Empty<IHttpRequestMessageDecorator>();
-			BasePath = baseUrl.AbsolutePath.Trim('/');
+			BasePath = baseUrl.AbsolutePath.TrimEnd('/');
 		}
 
 		public HttpApiClient( string baseUrl, IHttpClientFactory httpClientFactory, IEnumerable<IHttpClientDecorator> clientDecorators = null,
