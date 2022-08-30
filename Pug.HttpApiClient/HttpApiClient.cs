@@ -26,15 +26,15 @@ namespace Pug.HttpApiClient
 		{
 			BaseUrl = baseUrl ?? throw new ArgumentNullException( nameof(baseUrl) );
 
-			if( baseUrl.AbsolutePath != "/")
-				BaseAddress = new Uri( baseUrl.ToString().Replace( baseUrl.AbsolutePath, string.Empty ) );
-			else
-				BaseAddress = new Uri( baseUrl.ToString() );
+			BaseAddress =  new Uri( 
+				baseUrl.AbsolutePath == "/" ? 
+					baseUrl.ToString() : baseUrl.ToString().Replace( baseUrl.AbsolutePath, string.Empty )  
+			);
 			
 			_httpClientFactory = httpClientFactory ?? throw new ArgumentNullException( nameof(httpClientFactory) );
 			_clientDecorators = clientDecorators ?? Array.Empty<IHttpClientDecorator>();
 			_messageDecorators = messageDecorators ?? Array.Empty<IHttpRequestMessageDecorator>();
-			BasePath = baseUrl.AbsolutePath;
+			BasePath = baseUrl.AbsolutePath.Trim('/');
 		}
 
 		public HttpApiClient( string baseUrl, IHttpClientFactory httpClientFactory, IEnumerable<IHttpClientDecorator> clientDecorators = null,
@@ -72,7 +72,7 @@ namespace Pug.HttpApiClient
 		{
 			UriBuilder uriBuilder = new ( BaseAddress )
 			{
-				Path = string.IsNullOrWhiteSpace( path )? BaseUrl.AbsolutePath : $"{BaseUrl.AbsolutePath.Trim( '/' )}/{ path.TrimStart('/') }",
+				Path = string.IsNullOrWhiteSpace( path )? BasePath : $"{BasePath}/{ path.TrimStart('/') }",
 				Query = queries?.Select( x => $"{WebUtility.UrlEncode( x.Key )}={WebUtility.UrlEncode( x.Value )}" )
 								.Aggregate( ( x, y ) => $"{x}&{y}" ) ?? string.Empty
 			};
