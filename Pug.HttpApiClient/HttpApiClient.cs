@@ -68,7 +68,7 @@ namespace Pug.HttpApiClient
 			return httpClient;
 		}
 
-		private Uri ConstructRequestPath( string path, IEnumerable<KeyValuePair<string, string>> queries )
+		private Uri ConstructRequestUri( string path, IEnumerable<KeyValuePair<string, string>> queries )
 		{
 			UriBuilder uriBuilder = new ( BaseAddress )
 			{
@@ -122,9 +122,7 @@ namespace Pug.HttpApiClient
 					requestMessage.Headers.Add( header.Key, header.Value );
 				}
 
-			Uri requestUri = ConstructRequestPath( path, uriQueries );
-
-			requestMessage.RequestUri = new Uri( BaseAddress, requestUri );
+			requestMessage.RequestUri = ConstructRequestUri( path, uriQueries );
 			return requestMessage;
 		}
 
