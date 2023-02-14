@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 using System.Text.Json.Serialization;
 #endif
 
-namespace Pug.HttpApiClient.OAuth2Decorators
+namespace Pug.HttpApiClient.OAuth2
 {
 	public record OpenIdConfiguration
 	{

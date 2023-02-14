@@ -1,10 +1,6 @@
-﻿using System.Threading.Tasks;
-
-namespace Pug.HttpApiClient.OAuth2Decorators
+﻿namespace Pug.HttpApiClient.OAuth2
 {
-	public interface IClientAccessTokenManager
+	public interface IClientAccessTokenManager : IAccessTokenManager<AccessToken>
 	{
-		ClientAccessToken GetAccessToken();
-		Task<ClientAccessToken> GetAccessTokenAsync();
 	}
 }

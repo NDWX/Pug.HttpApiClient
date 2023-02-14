@@ -4,13 +4,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using Pug.HttpApiClient.Json;
 
-namespace Pug.HttpApiClient.OAuth2Decorators
+namespace Pug.HttpApiClient.OAuth2
 {
-	public abstract class AccessTokenManager<TToken> where TToken : AccessToken
+	public abstract class AccessTokenManager<TToken> : IAccessTokenManager<TToken>
+		where TToken : AccessToken
 	{
 		private readonly SemaphoreSlim _accessTokenRequestSync = new ( 1, 1 );
 
-		private TToken _clientAccessToken;
+		private TToken _accessToken;
 		private DateTime _clientAccessTokenExpiryTimestamp = DateTime.MaxValue;
 
 		protected AccessTokenManager( Uri oAuth2Endpoint, IHttpClientFactory httpClientFactory )
@@ -21,7 +22,7 @@ namespace Pug.HttpApiClient.OAuth2Decorators
 
 		private bool NewAccessTokenRequired()
 		{
-			return _clientAccessToken is null || _clientAccessTokenExpiryTimestamp <= DateTime.Now;
+			return _accessToken is null || _clientAccessTokenExpiryTimestamp <= DateTime.Now;
 		}
 
 		protected Uri Oauth2Endpoint { get; }
@@ -55,7 +56,7 @@ namespace Pug.HttpApiClient.OAuth2Decorators
 
 			if( !NewAccessTokenRequired() )
 			{
-				TToken token = _clientAccessToken;
+				TToken token = _accessToken;
 				
 				_accessTokenRequestSync.Release();
 				
@@ -64,16 +65,16 @@ namespace Pug.HttpApiClient.OAuth2Decorators
 
 			try
 			{
-				_clientAccessToken = GetNewAccessToken();
+				_accessToken = GetNewAccessToken();
 
-				_clientAccessTokenExpiryTimestamp = DateTime.Now.AddSeconds( _clientAccessToken.ValidityPeriod - 5 );
+				_clientAccessTokenExpiryTimestamp = DateTime.Now.AddSeconds( _accessToken.ValidityPeriod - 5 );
 			}
 			finally
 			{
 				_accessTokenRequestSync.Release();
 			}
 
-			return _clientAccessToken;
+			return _accessToken;
 		}
 
 		public async Task<TToken> GetAccessTokenAsync()
@@ -82,7 +83,7 @@ namespace Pug.HttpApiClient.OAuth2Decorators
 
 			if( !NewAccessTokenRequired() )
 			{
-				TToken token = _clientAccessToken;
+				TToken token = _accessToken;
 				
 				_accessTokenRequestSync.Release();
 				
@@ -91,16 +92,16 @@ namespace Pug.HttpApiClient.OAuth2Decorators
 
 			try
 			{
-				_clientAccessToken = await GetNewAccessTokenAsync();
+				_accessToken = await GetNewAccessTokenAsync();
 
-				_clientAccessTokenExpiryTimestamp = DateTime.Now.AddSeconds( _clientAccessToken.ValidityPeriod - 5 );
+				_clientAccessTokenExpiryTimestamp = DateTime.Now.AddSeconds( _accessToken.ValidityPeriod - 5 );
 			}
 			finally
 			{
 				_accessTokenRequestSync.Release();
 			}
 
-			return _clientAccessToken;
+			return _accessToken;
 		}
 	}
 }

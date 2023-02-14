@@ -1,6 +1,4 @@
-﻿using Pug.HttpApiClient;
-
-namespace Pug.HttpApiClient
+﻿namespace Pug.HttpApiClient
 {
 	public abstract class ApiClient
 	{

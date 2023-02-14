@@ -3,26 +3,25 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Net.Mime;
 using System.Security.Authentication;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
-namespace Pug.HttpApiClient.OAuth2Decorators
+namespace Pug.HttpApiClient.OAuth2
 {
-	public sealed class ImpersonationAccessTokenManager : AccessTokenManager<AccessToken>, IImpersonationAccessTokenManager
+	public sealed class TokenExchangeAccessTokenManager : AccessTokenManager<AccessToken>
 	{
 		private readonly string _clientId;
 		private readonly string _clientSecret;
 		private readonly string _scopes;
 		private readonly ITokenExchangeSubjectTokenSource _subjectTokenSource;
 
-		private const string GrantType = "urn:ietf:params:oauth:grant-type:token-exchange",
+		public const string GrantType = "urn:ietf:params:oauth:grant-type:token-exchange",
 							SubjectTokenType = "urn:ietf:params:oauth:token-type:access_token";
 		
 		private readonly MediaTypeWithQualityHeaderValue _jsonMediaType = new ( "*/*" );
 
-		public ImpersonationAccessTokenManager( string oAuth2Endpoint, string clientId, string clientSecret, string scopes, 
+		public TokenExchangeAccessTokenManager( string oAuth2Endpoint, string clientId, string clientSecret, string scopes, 
 												ITokenExchangeSubjectTokenSource subjectTokenSource,
 												IHttpClientFactory httpClientFactory )
 			: this(new Uri( oAuth2Endpoint ?? throw new ArgumentNullException( nameof(oAuth2Endpoint) ) ), 
@@ -31,7 +30,7 @@ namespace Pug.HttpApiClient.OAuth2Decorators
 			
 		}
 		
-		public ImpersonationAccessTokenManager( Uri oAuth2Endpoint, string clientId, string clientSecret, string scopes, 
+		public TokenExchangeAccessTokenManager( Uri oAuth2Endpoint, string clientId, string clientSecret, string scopes, 
 												ITokenExchangeSubjectTokenSource subjectTokenSource,
 												IHttpClientFactory httpClientFactory ) 
 			: base( oAuth2Endpoint, httpClientFactory )
