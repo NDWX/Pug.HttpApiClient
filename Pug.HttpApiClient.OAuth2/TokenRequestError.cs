@@ -1,6 +1,6 @@
 using System.Runtime.Serialization;
 
-namespace Pug.HttpApiClient.OAuth2Decorators
+namespace Pug.HttpApiClient.OAuth2
 {
 	[DataContract]
 	public record TokenRequestError

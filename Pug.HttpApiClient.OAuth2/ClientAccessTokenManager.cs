@@ -3,25 +3,18 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Net.Mime;
 using System.Security.Authentication;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
-namespace Pug.HttpApiClient.OAuth2Decorators
+namespace Pug.HttpApiClient.OAuth2
 {
-	internal sealed class ClientAccessTokenManager : AccessTokenManager<ClientAccessToken>, IClientAccessTokenManager
+	internal sealed class ClientAccessTokenManager : AccessTokenManager<AccessToken>, IClientAccessTokenManager
 	{
+		private readonly string _clientSecret;
 		private readonly BasicAuthenticationMessageDecorator _clientCredentialsMessageDecorator;
 		private readonly MediaTypeWithQualityHeaderValue _jsonMediaType = new ( "*/*" );
 		private readonly FormUrlEncodedContent _clientTokenRequestContent;
-
-		public ClientAccessTokenManager( string oAuth2Endpoint, string clientId, string clientSecret, string scopes,
-										IHttpClientFactory httpClientFactory ) 
-			: this(new Uri( oAuth2Endpoint ?? throw new ArgumentNullException( nameof(oAuth2Endpoint) ) ), 
-					clientId, clientSecret, scopes, httpClientFactory)
-		{
-		}
 		
 		public ClientAccessTokenManager( Uri oAuth2Endpoint, string clientId, string clientSecret, string scopes,
 										IHttpClientFactory httpClientFactory ) 
@@ -33,6 +26,8 @@ namespace Pug.HttpApiClient.OAuth2Decorators
 				throw new ArgumentException( "Value cannot be null or whitespace.", nameof(clientSecret) );
 
 			if( scopes is null ) throw new ArgumentNullException( nameof(scopes) );
+			_clientSecret = clientSecret;
+			ClientId = clientId;
 
 			_clientCredentialsMessageDecorator = new BasicAuthenticationMessageDecorator( clientId, clientSecret );
 			_clientTokenRequestContent = new FormUrlEncodedContent(
@@ -42,10 +37,11 @@ namespace Pug.HttpApiClient.OAuth2Decorators
 						["scope"] = scopes
 					}
 				);
-			
 		}
 		
-		protected override ClientAccessToken GetNewAccessToken()
+		public string ClientId { get; }
+		
+		protected override AccessToken GetNewAccessToken()
 		{
 			HttpResponseMessage responseMessage;
 
@@ -98,7 +94,7 @@ namespace Pug.HttpApiClient.OAuth2Decorators
 				case HttpStatusCode.OK:
 					string tokenJson = responseMessage.Content.ReadAsStringAsync().ConfigureAwait( false ).GetAwaiter().GetResult();
 
-					return JsonConvert.DeserializeObject<ClientAccessToken>( tokenJson );
+					return JsonConvert.DeserializeObject<AccessToken>( tokenJson );
 				
 				default:
 					throw new HttpApiRequestException(
@@ -106,7 +102,7 @@ namespace Pug.HttpApiClient.OAuth2Decorators
 			}
 		}
 
-		protected override async Task<ClientAccessToken> GetNewAccessTokenAsync()
+		protected override async Task<AccessToken> GetNewAccessTokenAsync()
 		{
 			HttpResponseMessage responseMessage;
 
@@ -154,7 +150,7 @@ namespace Pug.HttpApiClient.OAuth2Decorators
 				case HttpStatusCode.OK:
 					string tokenJson = await responseMessage.Content.ReadAsStringAsync();
 
-					return JsonConvert.DeserializeObject<ClientAccessToken>( tokenJson );
+					return JsonConvert.DeserializeObject<AccessToken>( tokenJson );
 				
 				default:
 					throw new HttpApiRequestException(

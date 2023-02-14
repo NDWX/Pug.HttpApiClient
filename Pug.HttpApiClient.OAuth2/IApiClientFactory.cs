@@ -1,14 +1,18 @@
 ﻿using System;
-using Pug.HttpApiClient.OAuth2Decorators;
 
 namespace Pug.HttpApiClient.OAuth2
 {
-	public interface IApiClientFactory<TClient> : Pug.HttpApiClient.IApiClientFactory<TClient>
+	public interface IApiClientFactory<out TClient> 
+		: Pug.HttpApiClient.IApiClientFactory<TClient>
+		where TClient : IHttpApiClient
 	{
 		Uri OAuth2ProviderUrl { get; }
 		
-		string ClientId { get; }
-
 		TClient GetClient( ITokenExchangeSubjectTokenSource tokenExchangeSubjectTokenSource );
+		
+		TClient GetClient( RefreshableAccessToken refreshableAccessToken );
+		
+		[Obsolete("Use authorization code flow instead where possible")]
+		TClient GetClient( string username, string password );
 	}
 }

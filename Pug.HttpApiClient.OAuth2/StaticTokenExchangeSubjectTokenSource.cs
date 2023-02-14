@@ -1,6 +1,6 @@
 using System;
 
-namespace Pug.HttpApiClient.OAuth2Decorators
+namespace Pug.HttpApiClient.OAuth2
 {
 	public class StaticTokenExchangeSubjectTokenSource : ITokenExchangeSubjectTokenSource
 	{
