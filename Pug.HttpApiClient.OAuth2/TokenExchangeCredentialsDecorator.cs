@@ -5,7 +5,8 @@ namespace Pug.HttpApiClient.OAuth2
 {
 	public class TokenExchangeCredentialsDecorator : AccessTokenMessageDecorator
 	{
-		public TokenExchangeCredentialsDecorator( IAccessTokenManager<AccessToken> tokenManager ) : base(tokenManager)
+		public TokenExchangeCredentialsDecorator( TokenExchangeAccessTokenManager tokenManager ) 
+			: base(tokenManager)
 		{
 		}
 

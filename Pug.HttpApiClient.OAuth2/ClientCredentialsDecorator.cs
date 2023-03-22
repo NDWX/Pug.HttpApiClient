@@ -5,7 +5,7 @@ namespace Pug.HttpApiClient.OAuth2
 {
 	public class ClientCredentialsDecorator : AccessTokenMessageDecorator
 	{
-		public ClientCredentialsDecorator( IClientAccessTokenManager accessTokenManager ) 
+		public ClientCredentialsDecorator( ClientAccessTokenManager accessTokenManager ) 
 			: base(accessTokenManager)
 		{
 		}

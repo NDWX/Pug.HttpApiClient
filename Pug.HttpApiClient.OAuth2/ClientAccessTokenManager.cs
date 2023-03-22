@@ -9,9 +9,8 @@ using Newtonsoft.Json;
 
 namespace Pug.HttpApiClient.OAuth2
 {
-	internal sealed class ClientAccessTokenManager : AccessTokenManager<AccessToken>, IClientAccessTokenManager
+	public sealed class ClientAccessTokenManager : AccessTokenManager<AccessToken>, IClientAccessTokenManager
 	{
-		private readonly string _clientSecret;
 		private readonly BasicAuthenticationMessageDecorator _clientCredentialsMessageDecorator;
 		private readonly MediaTypeWithQualityHeaderValue _jsonMediaType = new ( "*/*" );
 		private readonly FormUrlEncodedContent _clientTokenRequestContent;
@@ -26,7 +25,6 @@ namespace Pug.HttpApiClient.OAuth2
 				throw new ArgumentException( "Value cannot be null or whitespace.", nameof(clientSecret) );
 
 			if( scopes is null ) throw new ArgumentNullException( nameof(scopes) );
-			_clientSecret = clientSecret;
 			ClientId = clientId;
 
 			_clientCredentialsMessageDecorator = new BasicAuthenticationMessageDecorator( clientId, clientSecret );
