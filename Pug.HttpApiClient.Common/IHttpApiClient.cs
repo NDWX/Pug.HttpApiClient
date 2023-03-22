@@ -29,10 +29,11 @@ namespace Pug.HttpApiClient
 												IDictionary<string, string> headers = null,
 												IDictionary<string, string> queries = null,
 												MediaTypeWithQualityHeaderValue mediaType = null );
-
+#if !NETSTANDARD
 		Task<HttpResponseMessage> PatchAsync( string path,
 											HttpContent content,
 											MediaTypeWithQualityHeaderValue mediaType, IDictionary<string, string> headers,
 											IDictionary<string, string> queries );
+#endif
 	}
 }

@@ -20,21 +20,27 @@ namespace Pug.HttpApiClient
 		private readonly IEnumerable<IHttpRequestMessageDecorator> _messageDecorators;
 
 		public Uri BaseUrl { get; }
-
-		public HttpApiClient( Uri baseUrl, IHttpClientFactory httpClientFactory, IEnumerable<IHttpClientDecorator> clientDecorators = null,
+		
+		protected HttpApiClient( Uri baseUrl, IEnumerable<IHttpClientDecorator> clientDecorators = null,
 							IEnumerable<IHttpRequestMessageDecorator> messageDecorators = null )
 		{
 			BaseUrl = baseUrl ?? throw new ArgumentNullException( nameof(baseUrl) );
 
 			BaseAddress =  new Uri( 
-				baseUrl.AbsolutePath == "/" ? 
-					baseUrl.ToString() : baseUrl.ToString().Replace( baseUrl.AbsolutePath, string.Empty )  
-			);
+					baseUrl.AbsolutePath == "/" ? 
+						baseUrl.ToString() : baseUrl.ToString().Replace( baseUrl.AbsolutePath, string.Empty )  
+				);
 			
-			_httpClientFactory = httpClientFactory ?? throw new ArgumentNullException( nameof(httpClientFactory) );
 			_clientDecorators = clientDecorators ?? Array.Empty<IHttpClientDecorator>();
 			_messageDecorators = messageDecorators ?? Array.Empty<IHttpRequestMessageDecorator>();
 			BasePath = baseUrl.AbsolutePath.TrimEnd('/');
+		}
+
+		public HttpApiClient( Uri baseUrl, IHttpClientFactory httpClientFactory, IEnumerable<IHttpClientDecorator> clientDecorators = null,
+							IEnumerable<IHttpRequestMessageDecorator> messageDecorators = null )
+		: this(baseUrl, clientDecorators, messageDecorators)
+		{
+			_httpClientFactory = httpClientFactory ?? throw new ArgumentNullException( nameof(httpClientFactory) );
 		}
 
 		public HttpApiClient( string baseUrl, IHttpClientFactory httpClientFactory, IEnumerable<IHttpClientDecorator> clientDecorators = null,
@@ -156,13 +162,7 @@ namespace Pug.HttpApiClient
 
 					case HttpStatusCode.BadRequest:
 						throw new HttpApiRequestException( responseMessage );
-
-					case HttpStatusCode.Locked:
-						throw new HttpApiRequestException(
-							new InvalidOperationException( 
-								$"Resource cannot be modified: {responseMessage.StatusCode} ({responseMessage.ReasonPhrase})" ),
-							responseMessage );
-
+					
 					case HttpStatusCode.NotFound:
 						throw new UnknownResourceException( responseMessage );
 
@@ -175,8 +175,16 @@ namespace Pug.HttpApiClient
 					case HttpStatusCode.Conflict:
 						throw new HttpApiRequestException( "Possible authentication/authorization or resource conflict error", responseMessage );
 
+#if !NETSTANDARD
+					case HttpStatusCode.Locked:
+						throw new HttpApiRequestException(
+							new InvalidOperationException( 
+								$"Resource cannot be modified: {responseMessage.StatusCode} ({responseMessage.ReasonPhrase})" ),
+							responseMessage );
+					
 					case HttpStatusCode.InsufficientStorage:
 						throw new InternalServerErrorException( responseMessage );
+#endif
 
 					case HttpStatusCode.NotImplemented:
 						throw new HttpApiRequestException( new NotImplementedException(), responseMessage );
@@ -219,6 +227,7 @@ namespace Pug.HttpApiClient
 			return await SendAsync( HttpMethod.Delete, path, queries, headers, mediaType );
 		}
 
+#if !NETSTANDARD
 		public virtual async Task<HttpResponseMessage> PatchAsync( string path,
 																	HttpContent content,
 																	MediaTypeWithQualityHeaderValue mediaType, IDictionary<string, string> headers,
@@ -226,5 +235,6 @@ namespace Pug.HttpApiClient
 		{
 			return await SendAsync(HttpMethod.Patch, path, queries, headers, mediaType, content );
 		}
+#endif
 	}
 }

@@ -6,6 +6,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pug.HttpApiClient.OAuth2", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pug.HttpApiClient.Common", "Pug.HttpApiClient.Common\Pug.HttpApiClient.Common.csproj", "{695AA373-79DE-4E9B-80E2-3713F4780DAA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pug.HttpApiClient.Tests", "Pug.HttpApiClient.Tests\Pug.HttpApiClient.Tests.csproj", "{35D5850C-CDCB-4C78-A991-2242996DDC1D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +26,9 @@ Global
 		{695AA373-79DE-4E9B-80E2-3713F4780DAA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{695AA373-79DE-4E9B-80E2-3713F4780DAA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{695AA373-79DE-4E9B-80E2-3713F4780DAA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{35D5850C-CDCB-4C78-A991-2242996DDC1D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{35D5850C-CDCB-4C78-A991-2242996DDC1D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{35D5850C-CDCB-4C78-A991-2242996DDC1D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{35D5850C-CDCB-4C78-A991-2242996DDC1D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
