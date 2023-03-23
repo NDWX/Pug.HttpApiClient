@@ -4,7 +4,7 @@ namespace Pug.HttpApiClient.OAuth2
 {
 	public interface IApiClientFactory<out TClient> 
 		: Pug.HttpApiClient.IApiClientFactory<TClient>
-		where TClient : IHttpApiClient
+		where TClient : ApiClient
 	{
 		Uri OAuth2ProviderUrl { get; }
 		
