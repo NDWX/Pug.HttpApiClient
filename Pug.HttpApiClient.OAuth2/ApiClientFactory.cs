@@ -5,7 +5,7 @@ namespace Pug.HttpApiClient.OAuth2
 {
 	public abstract class ApiClientFactory<TClient>
 		: IApiClientFactory<TClient>
-		where TClient : IHttpApiClient
+		where TClient : ApiClient
 	{
 		public string ClientId { get; }
 		public string OAuth2Scopes { get; }
