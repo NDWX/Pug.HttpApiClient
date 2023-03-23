@@ -2,7 +2,7 @@
 
 namespace Pug.HttpApiClient
 {
-	public interface IApiClientFactory<out TClient> where TClient : IHttpApiClient
+	public interface IApiClientFactory<out TClient> where TClient : ApiClient
 	{
 		Uri Url { get; }
 
