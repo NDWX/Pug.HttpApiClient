@@ -53,14 +53,17 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Create packages base folder
+        run: mkdir packages
+
       - name: Pack HttpApiClient project
         run: dotnet pack --no-build --output ${{env.PackagesBaseFolder}} --nologo --configuration ${{env.BuildConfiguration}} ${{env.HttpApiClientProject}}
 
       - name: Publish HttpApiClient NuGet package to NuGet.org
         run: dotnet nuget push ${{env.PackagesBaseFolder}}/*.nupkg --api-key ${{secrets.NUGET_APIKEY}} --source https://api.nuget.org/v3/index.json --skip-duplicate
 
-      - name: Create packages base folder
-        run: mkdir packages
+      - name: Clear packages folder
+        run: rm packages/*.nupkg
 
       - name: Pack Common project
         run: dotnet pack --no-build --output ${{env.PackagesBaseFolder}} --nologo --configuration ${{env.BuildConfiguration}} ${{env.CommonProject}}
