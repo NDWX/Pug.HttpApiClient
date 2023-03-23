@@ -16,7 +16,7 @@ namespace Pug.HttpApiClient.OAuth2
 		protected IHttpClientFactory HttpClientFactory { get; }
 		protected IHttpRequestMessageDecorator OAuthClientCredentialsDecorator { get; }
 
-		private protected ApiClientFactory( Uri url, Uri oAuth2ProviderUrl, string clientId, string clientSecret, string oAuth2Scopes,
+		protected ApiClientFactory( Uri url, Uri oAuth2ProviderUrl, string clientId, string clientSecret, string oAuth2Scopes,
 									IHttpClientFactory httpClientFactory )
 		{
 			ClientId = clientId;
