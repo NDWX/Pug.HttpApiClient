@@ -11,10 +11,25 @@ using System.Text.Json;
 
 namespace Pug.HttpApiClient.Json
 {
+
 	public static class IHttpApiClientJsonExtensions
 	{
 		private const string MediaTypeName = "application/json";
 
+		/// <summary>
+		/// Invoke GET call with JSON request and response type.
+		/// </summary>
+		/// <param name="httpApiClient">Instance of IHttpApiClient</param>
+		/// <param name="path">Request path</param>
+		/// <param name="headers">HTTP headers</param>
+		/// <param name="queries">URL Queries</param>
+		/// <typeparam name="T">Serializable class instance</typeparam>
+		/// <returns>Instance of <typeparamref name="T"/></returns>
+		/// <exception cref="Pug.Application.Security.NotAuthorized">When server returned 403 (Forbidden)</exception>
+		/// <exception cref="Pug.HttpApiClient.UnknownResourceException">When server returned 404 (Not Found) or 410 (Gone)</exception>
+		/// <exception cref="System.Security.Authentication.AuthenticationException">When server returned 401 (Unauthorized)</exception>
+		/// <exception cref="Pug.HttpApiClient.HttpApiRequestException">When server returned 40x. InvalidOperationException inner exception will be specified when server returned 405 (Method Not Allowed) or 423 (Locked).</exception>
+		/// <exception cref="Pug.HttpApiClient.InternalServerErrorException">When server returned 500 (Internal Server Error) or 507 (Insufficient Storage)</exception>
 		public static async Task<T> GetAsync<T>(this IHttpApiClient httpApiClient, string path, IDictionary<string, string> headers = null, IDictionary<string, string> queries = null )
 		{
 			HttpResponseMessage response = await httpApiClient.GetAsync(
@@ -34,6 +49,22 @@ namespace Pug.HttpApiClient.Json
 
 		}
 
+
+		/// <summary>
+		/// Invoke POST call with JSON request and response type.
+		/// </summary>
+		/// <param name="httpApiClient">Instance of IHttpApiClient</param>
+		/// <param name="path">Request path</param>
+		/// <param name="content">Request content</param>
+		/// <param name="headers">HTTP headers</param>
+		/// <param name="queries">URL Queries</param>
+		/// <typeparam name="TContent">Serializable class instance</typeparam>
+		/// <returns>Instance of HttpResponseMessage</returns>
+		/// <exception cref="Pug.Application.Security.NotAuthorized">When server returned 403 (Forbidden)</exception>
+		/// <exception cref="Pug.HttpApiClient.UnknownResourceException">When server returned 404 (Not Found) or 410 (Gone)</exception>
+		/// <exception cref="System.Security.Authentication.AuthenticationException">When server returned 401 (Unauthorized)</exception>
+		/// <exception cref="Pug.HttpApiClient.HttpApiRequestException">When server returned 40x. InvalidOperationException inner exception will be specified when server returned 405 (Method Not Allowed) or 423 (Locked).</exception>
+		/// <exception cref="Pug.HttpApiClient.InternalServerErrorException">When server returned 500 (Internal Server Error) or 507 (Insufficient Storage)</exception>
 		public static Task<HttpResponseMessage> PostAsync<TContent>( this IHttpApiClient httpApiClient, string path, TContent content, IDictionary<string, string> headers = null,
 																	IDictionary<string, string> queries = null )
 		{
@@ -51,6 +82,21 @@ namespace Pug.HttpApiClient.Json
 			return httpApiClient.PostAsync( path, httpContent, new MediaTypeWithQualityHeaderValue( MediaTypeName ), headers, queries );
 		}
 
+		/// <summary>
+		/// Invoke PUT call with JSON request and response type.
+		/// </summary>
+		/// <param name="httpApiClient">Instance of IHttpApiClient</param>
+		/// <param name="path">Request path</param>
+		/// <param name="content">Request content</param>
+		/// <param name="headers">HTTP headers</param>
+		/// <param name="queries">URL Queries</param>
+		/// <typeparam name="TContent">Serializable class instance</typeparam>
+		/// <returns>Instance of HttpResponseMessage</returns>
+		/// <exception cref="Pug.Application.Security.NotAuthorized">When server returned 403 (Forbidden)</exception>
+		/// <exception cref="Pug.HttpApiClient.UnknownResourceException">When server returned 404 (Not Found) or 410 (Gone)</exception>
+		/// <exception cref="System.Security.Authentication.AuthenticationException">When server returned 401 (Unauthorized)</exception>
+		/// <exception cref="Pug.HttpApiClient.HttpApiRequestException">When server returned 40x. InvalidOperationException inner exception will be specified when server returned 405 (Method Not Allowed) or 423 (Locked).</exception>
+		/// <exception cref="Pug.HttpApiClient.InternalServerErrorException">When server returned 500 (Internal Server Error) or 507 (Insufficient Storage)</exception>
 		public static Task<HttpResponseMessage> PutAsync<TContent>( this IHttpApiClient httpApiClient, string path, TContent content, IDictionary<string, string> headers = null,
 																	IDictionary<string, string> queries = null )
 		{
@@ -69,6 +115,22 @@ namespace Pug.HttpApiClient.Json
 		}
 
 #if !NETSTANDARD
+
+		/// <summary>
+		/// Invoke PATCH call with JSON request and response type.
+		/// </summary>
+		/// <param name="httpApiClient">Instance of IHttpApiClient</param>
+		/// <param name="path">Request path</param>
+		/// <param name="content">Request content</param>
+		/// <param name="headers">HTTP headers</param>
+		/// <param name="queries">URL Queries</param>
+		/// <typeparam name="TContent">Serializable class instance</typeparam>
+		/// <returns>Instance of HttpResponseMessage</returns>
+		/// <exception cref="Pug.Application.Security.NotAuthorized">When server returned 403 (Forbidden)</exception>
+		/// <exception cref="Pug.HttpApiClient.UnknownResourceException">When server returned 404 (Not Found) or 410 (Gone)</exception>
+		/// <exception cref="System.Security.Authentication.AuthenticationException">When server returned 401 (Unauthorized)</exception>
+		/// <exception cref="Pug.HttpApiClient.HttpApiRequestException">When server returned 40x. InvalidOperationException inner exception will be specified when server returned 405 (Method Not Allowed) or 423 (Locked).</exception>
+		/// <exception cref="Pug.HttpApiClient.InternalServerErrorException">When server returned 500 (Internal Server Error) or 507 (Insufficient Storage)</exception>
 		public static Task<HttpResponseMessage> PatchAsync<TContent>( this IHttpApiClient httpApiClient, string path, TContent content, IDictionary<string, string> headers = null,
 																	IDictionary<string, string> queries = null )
 		{

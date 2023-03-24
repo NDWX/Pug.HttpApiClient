@@ -196,15 +196,42 @@ namespace Pug.HttpApiClient
 				return responseMessage;
 			}
 		}
-
+		
+		/// <summary>
+		/// Invoke HTTP GET call
+		/// </summary>
+		/// <param name="path">Request path</param>
+		/// <param name="mediaType">HTTP media type</param>
+		/// <param name="headers">HTTP headers</param>
+		/// <param name="queries">URL Queries</param>
+		/// <exception cref="Pug.Application.Security.NotAuthorized">When server returned 403 (Forbidden)</exception>
+		/// <exception cref="Pug.HttpApiClient.UnknownResourceException">When server returned 404 (Not Found) or 410 (Gone)</exception>
+		/// <exception cref="System.Security.Authentication.AuthenticationException">When server returned 401 (Unauthorized)</exception>
+		/// <exception cref="Pug.HttpApiClient.HttpApiRequestException">When server returned 40x. InvalidOperationException inner exception will be specified when server returned 405 (Method Not Allowed) or 423 (Locked).</exception>
+		/// <exception cref="Pug.HttpApiClient.InternalServerErrorException">When server returned 500 (Internal Server Error) or 507 (Insufficient Storage)</exception>
+		/// <returns>Instance of HttpResponseMessage</returns>
 		public virtual async Task<HttpResponseMessage> GetAsync( string path,
-														MediaTypeWithQualityHeaderValue mediaType,
-														IDictionary<string, string> headers,
-														IDictionary<string, string> queries )
+																MediaTypeWithQualityHeaderValue mediaType,
+																IDictionary<string, string> headers,
+																IDictionary<string, string> queries )
 		{
 			return await SendAsync( HttpMethod.Get, path, queries, headers, mediaType );
 		}
 
+		/// <summary>
+		/// Invoke HTTP POST call
+		/// </summary>
+		/// <param name="path">Request path</param>
+		/// <param name="content">HTTP content</param>
+		/// <param name="mediaType">HTTP media type</param>
+		/// <param name="headers">HTTP headers</param>
+		/// <param name="queries">URL Queries</param>
+		/// <exception cref="Pug.Application.Security.NotAuthorized">When server returned 403 (Forbidden)</exception>
+		/// <exception cref="Pug.HttpApiClient.UnknownResourceException">When server returned 404 (Not Found) or 410 (Gone)</exception>
+		/// <exception cref="System.Security.Authentication.AuthenticationException">When server returned 401 (Unauthorized)</exception>
+		/// <exception cref="Pug.HttpApiClient.HttpApiRequestException">When server returned 40x. InvalidOperationException inner exception will be specified when server returned 405 (Method Not Allowed) or 423 (Locked).</exception>
+		/// <exception cref="Pug.HttpApiClient.InternalServerErrorException">When server returned 500 (Internal Server Error) or 507 (Insufficient Storage)</exception>
+		/// <returns>Instance of HttpResponseMessage</returns>
 		public virtual async Task<HttpResponseMessage> PostAsync( string path, HttpContent content,
 																MediaTypeWithQualityHeaderValue mediaType, IDictionary<string, string> headers = null,
 																IDictionary<string, string> queries = null )
@@ -212,6 +239,20 @@ namespace Pug.HttpApiClient
 			return await SendAsync( HttpMethod.Post, path, queries, headers, mediaType, content );
 		}
 
+		/// <summary>
+		/// Invoke HTTP PUT call
+		/// </summary>
+		/// <param name="path">Request path</param>
+		/// <param name="content">HTTP content</param>
+		/// <param name="mediaType">HTTP media type</param>
+		/// <param name="headers">HTTP headers</param>
+		/// <param name="queries">URL Queries</param>
+		/// <exception cref="Pug.Application.Security.NotAuthorized">When server returned 403 (Forbidden)</exception>
+		/// <exception cref="Pug.HttpApiClient.UnknownResourceException">When server returned 404 (Not Found) or 410 (Gone)</exception>
+		/// <exception cref="System.Security.Authentication.AuthenticationException">When server returned 401 (Unauthorized)</exception>
+		/// <exception cref="Pug.HttpApiClient.HttpApiRequestException">When server returned 40x. InvalidOperationException inner exception will be specified when server returned 405 (Method Not Allowed) or 423 (Locked).</exception>
+		/// <exception cref="Pug.HttpApiClient.InternalServerErrorException">When server returned 500 (Internal Server Error) or 507 (Insufficient Storage)</exception>
+		/// <returns>Instance of HttpResponseMessage</returns>
 		public virtual async Task<HttpResponseMessage> PutAsync( string path, HttpContent content,
 																MediaTypeWithQualityHeaderValue mediaType, IDictionary<string, string> headers,
 																IDictionary<string, string> queries )
@@ -219,6 +260,19 @@ namespace Pug.HttpApiClient
 			return await SendAsync( HttpMethod.Put, path, queries, headers, mediaType, content );
 		}
 
+		/// <summary>
+		/// Invoke HTTP DELETE call
+		/// </summary>
+		/// <param name="path">Request path</param>
+		/// <param name="mediaType">HTTP media type</param>
+		/// <param name="headers">HTTP headers</param>
+		/// <param name="queries">URL Queries</param>
+		/// <exception cref="Pug.Application.Security.NotAuthorized">When server returned 403 (Forbidden)</exception>
+		/// <exception cref="Pug.HttpApiClient.UnknownResourceException">When server returned 404 (Not Found) or 410 (Gone)</exception>
+		/// <exception cref="System.Security.Authentication.AuthenticationException">When server returned 401 (Unauthorized)</exception>
+		/// <exception cref="Pug.HttpApiClient.HttpApiRequestException">When server returned 40x. InvalidOperationException inner exception will be specified when server returned 405 (Method Not Allowed) or 423 (Locked).</exception>
+		/// <exception cref="Pug.HttpApiClient.InternalServerErrorException">When server returned 500 (Internal Server Error) or 507 (Insufficient Storage)</exception>
+		/// <returns>Instance of HttpResponseMessage</returns>
 		public virtual async Task<HttpResponseMessage> DeleteAsync( string path,
 																	IDictionary<string, string> headers = null,
 																	IDictionary<string, string> queries = null,
@@ -228,6 +282,20 @@ namespace Pug.HttpApiClient
 		}
 
 #if !NETSTANDARD
+		/// <summary>
+		/// Invoke HTTP PATCH call
+		/// </summary>
+		/// <param name="path">Request path</param>
+		/// <param name="content">HTTP content</param>
+		/// <param name="mediaType">HTTP media type</param>
+		/// <param name="headers">HTTP headers</param>
+		/// <param name="queries">URL Queries</param>
+		/// <exception cref="Pug.Application.Security.NotAuthorized">When server returned 403 (Forbidden)</exception>
+		/// <exception cref="Pug.HttpApiClient.UnknownResourceException">When server returned 404 (Not Found) or 410 (Gone)</exception>
+		/// <exception cref="System.Security.Authentication.AuthenticationException">When server returned 401 (Unauthorized)</exception>
+		/// <exception cref="Pug.HttpApiClient.HttpApiRequestException">When server returned 40x. InvalidOperationException inner exception will be specified when server returned 405 (Method Not Allowed) or 423 (Locked).</exception>
+		/// <exception cref="Pug.HttpApiClient.InternalServerErrorException">When server returned 500 (Internal Server Error) or 507 (Insufficient Storage)</exception>
+		/// <returns>Instance of HttpResponseMessage</returns>
 		public virtual async Task<HttpResponseMessage> PatchAsync( string path,
 																	HttpContent content,
 																	MediaTypeWithQualityHeaderValue mediaType, IDictionary<string, string> headers,
