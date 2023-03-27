@@ -15,6 +15,8 @@ namespace Pug.HttpApiClient.Json
 	public static class IHttpApiClientJsonExtensions
 	{
 		private const string MediaTypeName = "application/json";
+		private static readonly MediaTypeWithQualityHeaderValue MediaType = new ( MediaTypeName );
+
 
 		/// <summary>
 		/// Invoke GET call with JSON request and response type.
@@ -32,10 +34,7 @@ namespace Pug.HttpApiClient.Json
 		/// <exception cref="Pug.HttpApiClient.InternalServerErrorException">When server returned 500 (Internal Server Error) or 507 (Insufficient Storage)</exception>
 		public static async Task<T> GetAsync<T>(this IHttpApiClient httpApiClient, string path, IDictionary<string, string> headers = null, IDictionary<string, string> queries = null )
 		{
-			HttpResponseMessage response = await httpApiClient.GetAsync(
-													path, new MediaTypeWithQualityHeaderValue( MediaTypeName ),
-													headers, queries
-												);
+			HttpResponseMessage response = await httpApiClient.GetAsync( path, MediaType, headers, queries );
 
 			if( !response.IsSuccessStatusCode ) throw new HttpApiRequestException( response );
 			
@@ -65,10 +64,10 @@ namespace Pug.HttpApiClient.Json
 		/// <exception cref="System.Security.Authentication.AuthenticationException">When server returned 401 (Unauthorized)</exception>
 		/// <exception cref="Pug.HttpApiClient.HttpApiRequestException">When server returned 40x. InvalidOperationException inner exception will be specified when server returned 405 (Method Not Allowed) or 423 (Locked).</exception>
 		/// <exception cref="Pug.HttpApiClient.InternalServerErrorException">When server returned 500 (Internal Server Error) or 507 (Insufficient Storage)</exception>
-		public static Task<HttpResponseMessage> PostAsync<TContent>( this IHttpApiClient httpApiClient, string path, TContent content, IDictionary<string, string> headers = null,
-																	IDictionary<string, string> queries = null )
+		public static Task<HttpResponseMessage> PostAsync<TContent>( 
+			this IHttpApiClient httpApiClient, string path, TContent content,
+			IDictionary<string, string> headers = null, IDictionary<string, string> queries = null )
 		{
-			HttpContent httpContent;
 			string contentJson;
 
 #if NETCOREAPP2_1 || NETSTANDARD
@@ -76,10 +75,10 @@ namespace Pug.HttpApiClient.Json
 #else
 			contentJson = JsonSerializer.Serialize( content );
 #endif
+			HttpContent httpContent = new StringContent( contentJson );
+			httpContent.Headers.ContentType = MediaType;
 
-			httpContent = new StringContent( contentJson );
-
-			return httpApiClient.PostAsync( path, httpContent, new MediaTypeWithQualityHeaderValue( MediaTypeName ), headers, queries );
+			return httpApiClient.PostAsync( path, httpContent, MediaType, headers, queries );
 		}
 
 		/// <summary>
@@ -97,10 +96,10 @@ namespace Pug.HttpApiClient.Json
 		/// <exception cref="System.Security.Authentication.AuthenticationException">When server returned 401 (Unauthorized)</exception>
 		/// <exception cref="Pug.HttpApiClient.HttpApiRequestException">When server returned 40x. InvalidOperationException inner exception will be specified when server returned 405 (Method Not Allowed) or 423 (Locked).</exception>
 		/// <exception cref="Pug.HttpApiClient.InternalServerErrorException">When server returned 500 (Internal Server Error) or 507 (Insufficient Storage)</exception>
-		public static Task<HttpResponseMessage> PutAsync<TContent>( this IHttpApiClient httpApiClient, string path, TContent content, IDictionary<string, string> headers = null,
-																	IDictionary<string, string> queries = null )
+		public static Task<HttpResponseMessage> PutAsync<TContent>( 
+			this IHttpApiClient httpApiClient, string path, TContent content, 
+			IDictionary<string, string> headers = null, IDictionary<string, string> queries = null )
 		{
-			HttpContent httpContent;
 			string contentJson;
 
 #if NETCOREAPP2_1 || NETSTANDARD
@@ -108,13 +107,11 @@ namespace Pug.HttpApiClient.Json
 #else
 			contentJson = JsonSerializer.Serialize( content );
 #endif
+			HttpContent httpContent = new StringContent( contentJson );
+			httpContent.Headers.ContentType = MediaType;
 
-			httpContent = new StringContent( contentJson );
-
-			return httpApiClient.PutAsync( path, httpContent, new MediaTypeWithQualityHeaderValue( MediaTypeName ), headers, queries );
+			return httpApiClient.PutAsync( path, httpContent, MediaType, headers, queries );
 		}
-
-#if !NETSTANDARD
 
 		/// <summary>
 		/// Invoke PATCH call with JSON request and response type.
@@ -131,22 +128,21 @@ namespace Pug.HttpApiClient.Json
 		/// <exception cref="System.Security.Authentication.AuthenticationException">When server returned 401 (Unauthorized)</exception>
 		/// <exception cref="Pug.HttpApiClient.HttpApiRequestException">When server returned 40x. InvalidOperationException inner exception will be specified when server returned 405 (Method Not Allowed) or 423 (Locked).</exception>
 		/// <exception cref="Pug.HttpApiClient.InternalServerErrorException">When server returned 500 (Internal Server Error) or 507 (Insufficient Storage)</exception>
-		public static Task<HttpResponseMessage> PatchAsync<TContent>( this IHttpApiClient httpApiClient, string path, TContent content, IDictionary<string, string> headers = null,
-																	IDictionary<string, string> queries = null )
+		public static Task<HttpResponseMessage> PatchAsync<TContent>( 
+			this IHttpApiClient httpApiClient, string path, TContent content, 
+			IDictionary<string, string> headers = null, IDictionary<string, string> queries = null )
 		{
-			HttpContent httpContent;
 			string contentJson;
 
-#if NETCOREAPP2_1
+#if NETCOREAPP2_1 || NETSTANDARD
 			contentJson = JsonConvert.SerializeObject( content );
 #else
 			contentJson = JsonSerializer.Serialize( content );
 #endif
+			HttpContent httpContent = new StringContent( contentJson );
+			httpContent.Headers.ContentType = MediaType;
 
-			httpContent = new StringContent( contentJson );
-
-			return httpApiClient.PatchAsync( path, httpContent, new MediaTypeWithQualityHeaderValue( MediaTypeName ), headers, queries );
+			return httpApiClient.PatchAsync( path, httpContent, MediaType, headers, queries );
 		}
-#endif
 	}
 }
