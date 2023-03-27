@@ -8,17 +8,17 @@
 		<Title>Pug.HttpApiClient</Title>
 		<Authors>Andrian</Authors>
 		<Description>HTTP API client library</Description>
-		<AssemblyVersion>0.5.3</AssemblyVersion>
-		<FileVersion>0.5.3</FileVersion>
+		<AssemblyVersion>0.5.4</AssemblyVersion>
+		<FileVersion>0.5.4</FileVersion>
 		<RepositoryUrl>https://github.com/NDWX/Pug.HttpApiClient.git</RepositoryUrl>
 		<RepositoryType>Git</RepositoryType>
-		<PackageVersion>0.5.3</PackageVersion>
+		<PackageVersion>0.5.4</PackageVersion>
 		<PackageId>Pug.HttpApiClient</PackageId>
 		<PackageTags>Pug HTTP API Client Helpers</PackageTags>
 		<PackageLicenseExpression>AGPL-3.0-or-later</PackageLicenseExpression>
 		<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
 		<PackageReleaseNotes>
-			HTTP patch support for .NET Standard 2.0.
+			Fixed bug in HttpApiClient JSON extension functions where HTTP content type is not specified.
 		</PackageReleaseNotes>
 	</PropertyGroup>
 
