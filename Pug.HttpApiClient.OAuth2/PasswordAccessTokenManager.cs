@@ -18,7 +18,7 @@ namespace Pug.HttpApiClient.OAuth2
 
 		private static RefreshableAccessToken GetNewAccessToken(RefreshTokenManager refreshTokenManager, string username, string password, string scopes)
 		{
-			FormUrlEncodedContent formUrlEncodedContent = new FormUrlEncodedContent(
+			FormUrlEncodedContent formUrlEncodedContent = new (
 					new Dictionary<string, string>
 					{
 						["grant_type"] = GrantType,
