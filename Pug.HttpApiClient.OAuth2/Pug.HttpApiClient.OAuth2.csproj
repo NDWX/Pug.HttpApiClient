@@ -7,11 +7,11 @@
 		<Title>Pug.HttpCLient.OAuth2</Title>
 		<Authors>Andrian</Authors>
 		<Description>HTTP API client library with OAuth2 authentication providers</Description>
-		<AssemblyVersion>0.3.3</AssemblyVersion>
-		<FileVersion>0.3.3</FileVersion>
+		<AssemblyVersion>0.3.4</AssemblyVersion>
+		<FileVersion>0.3.4</FileVersion>
 		<RepositoryUrl>https://github.com/NDWX/Pug.HttpApiClient.git</RepositoryUrl>
 		<RepositoryType>Git</RepositoryType>
-		<PackageVersion>0.3.3</PackageVersion>
+		<PackageVersion>0.3.4</PackageVersion>
 		<PackageId>Pug.HttpApiClient.OAuth2</PackageId>
 		<PackageTags>HTTP API Client OAuth2 Authentication Decorators</PackageTags>
 		<PackageLicenseExpression>AGPL-3.0-or-later</PackageLicenseExpression>
@@ -19,6 +19,14 @@
 		<PackageReleaseNotes>
 			Support for .NET Standard 2.0 and IApiClientFactory type parameter constraint relaxation.
 		</PackageReleaseNotes>
+	</PropertyGroup>
+
+	<PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+	  <DocumentationFile>bin\Debug\Pug.HttpApiClient.OAuth2.xml</DocumentationFile>
+	</PropertyGroup>
+
+	<PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+	  <DocumentationFile>bin\Release\Pug.HttpApiClient.OAuth2.xml</DocumentationFile>
 	</PropertyGroup>
 
 	<ItemGroup>

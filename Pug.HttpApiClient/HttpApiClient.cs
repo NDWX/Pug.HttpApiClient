@@ -32,7 +32,7 @@ namespace Pug.HttpApiClient
 				);
 			
 			_clientDecorators = clientDecorators ?? Array.Empty<IHttpClientDecorator>();
-			_messageDecorators = messageDecorators ?? Array.Empty<IHttpRequestMessageDecorator>();
+ 			_messageDecorators = messageDecorators ?? Array.Empty<IHttpRequestMessageDecorator>();
 			BasePath = baseUrl.AbsolutePath.TrimEnd('/');
 		}
 
@@ -281,7 +281,6 @@ namespace Pug.HttpApiClient
 			return await SendAsync( HttpMethod.Delete, path, queries, headers, mediaType );
 		}
 
-#if !NETSTANDARD
 		/// <summary>
 		/// Invoke HTTP PATCH call
 		/// </summary>
@@ -298,11 +297,17 @@ namespace Pug.HttpApiClient
 		/// <returns>Instance of HttpResponseMessage</returns>
 		public virtual async Task<HttpResponseMessage> PatchAsync( string path,
 																	HttpContent content,
-																	MediaTypeWithQualityHeaderValue mediaType, IDictionary<string, string> headers,
+																	MediaTypeWithQualityHeaderValue mediaType, 
+																	IDictionary<string, string> headers,
 																	IDictionary<string, string> queries )
 		{
-			return await SendAsync(HttpMethod.Patch, path, queries, headers, mediaType, content );
-		}
+			HttpMethod httpMethod = null;
+#if NETSTANDARD
+			httpMethod = new HttpMethod( "PATCH" );
+#else
+			httpMethod = HttpMethod.Patch;
 #endif
+			return await SendAsync(httpMethod, path, queries, headers, mediaType, content );
+		}
 	}
 }
