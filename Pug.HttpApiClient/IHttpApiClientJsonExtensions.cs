@@ -14,9 +14,14 @@ namespace Pug.HttpApiClient.Json
 
 	public static class IHttpApiClientJsonExtensions
 	{
-		private const string MediaTypeName = "application/json";
+		private const string MediaTypeName =
+#if NETSTANDARD
+			"application/json";
+#else
+			MediaTypeNames.Application.Json;
+#endif
+		
 		private static readonly MediaTypeWithQualityHeaderValue MediaType = new ( MediaTypeName );
-
 
 		/// <summary>
 		/// Invoke GET call with JSON request and response type.
@@ -43,7 +48,13 @@ namespace Pug.HttpApiClient.Json
 #if NETCOREAPP2_1 || NETSTANDARD
 			return JsonConvert.DeserializeObject<T>( openIdConfigurationString );
 #else
-			return JsonSerializer.Deserialize<T>( openIdConfigurationString );
+			return JsonSerializer.Deserialize<T>(
+					openIdConfigurationString,
+					new JsonSerializerOptions()
+					{
+						PropertyNameCaseInsensitive = true
+					}
+				);
 #endif
 
 		}
