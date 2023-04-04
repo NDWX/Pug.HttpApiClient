@@ -167,7 +167,7 @@ namespace Pug.HttpApiClient.OAuth2
 
 		protected override AccessToken GetNewAccessToken()
 		{
-			FormUrlEncodedContent formUrlEncodedContent = new FormUrlEncodedContent(
+			FormUrlEncodedContent formUrlEncodedContent = new (
 					new Dictionary<string, string>
 					{
 						["grant_type"] = GrantType,
@@ -181,7 +181,7 @@ namespace Pug.HttpApiClient.OAuth2
 
 		protected override async Task<AccessToken> GetNewAccessTokenAsync()
 		{
-			FormUrlEncodedContent formUrlEncodedContent = new FormUrlEncodedContent(
+			FormUrlEncodedContent formUrlEncodedContent = new (
 					new Dictionary<string, string>
 					{
 						["grant_type"] = GrantType,
