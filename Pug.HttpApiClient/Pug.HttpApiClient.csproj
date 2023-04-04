@@ -8,17 +8,17 @@
 		<Title>Pug.HttpApiClient</Title>
 		<Authors>Andrian</Authors>
 		<Description>HTTP API client library</Description>
-		<AssemblyVersion>0.5.6</AssemblyVersion>
-		<FileVersion>0.5.6</FileVersion>
+		<AssemblyVersion>0.5.7</AssemblyVersion>
+		<FileVersion>0.5.7</FileVersion>
 		<RepositoryUrl>https://github.com/NDWX/Pug.HttpApiClient.git</RepositoryUrl>
 		<RepositoryType>Git</RepositoryType>
-		<PackageVersion>0.5.6</PackageVersion>
+		<PackageVersion>0.5.7</PackageVersion>
 		<PackageId>Pug.HttpApiClient</PackageId>
 		<PackageTags>Pug HTTP API Client Helpers</PackageTags>
 		<PackageLicenseExpression>AGPL-3.0-or-later</PackageLicenseExpression>
 		<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
 		<PackageReleaseNotes>
-			Upgraded Pug.HttpApiClient.Common to v0.4.5
+			JSON extensions enhancements
 		</PackageReleaseNotes>
 	</PropertyGroup>
 
