@@ -28,7 +28,7 @@ namespace Pug.HttpApiClient.OAuth2
 					}
 				);
 
-			return refreshTokenManager.GetAccessToken( formUrlEncodedContent );
+			return refreshTokenManager.GetAccessToken( formUrlEncodedContent, true );
 		}
 	}
 }
