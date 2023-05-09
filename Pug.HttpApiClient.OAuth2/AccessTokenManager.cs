@@ -14,10 +14,11 @@ namespace Pug.HttpApiClient.OAuth2
 		private TToken _accessToken;
 		private DateTime _clientAccessTokenExpiryTimestamp = DateTime.MaxValue;
 
-		protected AccessTokenManager( Uri oAuth2Endpoint, IHttpClientFactory httpClientFactory )
+		protected AccessTokenManager( Uri oAuth2Endpoint, IHttpClientFactory httpClientFactory, TToken accessToken = null )
 		{
 			Oauth2Endpoint = oAuth2Endpoint;
 			HttpClientFactory = httpClientFactory ?? throw new ArgumentNullException( nameof(httpClientFactory) );
+			_accessToken = accessToken;
 		}
 
 		private bool NewAccessTokenRequired()

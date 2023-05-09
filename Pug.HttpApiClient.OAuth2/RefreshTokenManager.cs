@@ -55,7 +55,7 @@ namespace Pug.HttpApiClient.OAuth2
 		{
 		}
 
-		protected internal virtual RefreshableAccessToken GetAccessToken( FormUrlEncodedContent formUrlEncodedContent )
+		protected internal virtual RefreshableAccessToken GetAccessToken( FormUrlEncodedContent formUrlEncodedContent, bool useClientCredentials = false )
 		{
 			OpenIdConfiguration openIdConfiguration = GetOpenIdConfiguration();
 
@@ -66,7 +66,7 @@ namespace Pug.HttpApiClient.OAuth2
 				IHttpApiClient httpApiClient =
 					new HttpApiClient(
 							openIdConfiguration.TokenEndpoint, HttpClientFactory,
-							messageDecorators: new[] { ClientCredentialsDecorator }
+							messageDecorators: useClientCredentials? new[] { ClientCredentialsDecorator } : null
 						);
 				responseMessage =
 					httpApiClient.PostAsync( string.Empty,
@@ -115,7 +115,7 @@ namespace Pug.HttpApiClient.OAuth2
 			}
 		}
 
-		protected internal virtual async Task<AccessToken> GetAccessTokenAsync( FormUrlEncodedContent formUrlEncodedContent )
+		protected internal virtual async Task<AccessToken> GetAccessTokenAsync( FormUrlEncodedContent formUrlEncodedContent)
 		{
 			OpenIdConfiguration openIdConfiguration = await GetOpenIdConfigurationAsync();
 			HttpResponseMessage responseMessage;
@@ -172,7 +172,9 @@ namespace Pug.HttpApiClient.OAuth2
 					{
 						["grant_type"] = GrantType,
 						["scope"] = _scopes,
-						["refresh_token"] = AccessToken.RefreshToken
+						["refresh_token"] = AccessToken.RefreshToken,
+						["client_id"] = ClientId,
+						["client_secret"] = ClientSecret
 					}
 				);
 
@@ -186,7 +188,9 @@ namespace Pug.HttpApiClient.OAuth2
 					{
 						["grant_type"] = GrantType,
 						["scope"] = _scopes,
-						["refresh_token"] = AccessToken.RefreshToken
+						["refresh_token"] = AccessToken.RefreshToken,
+						["client_id"] = ClientId,
+						["client_secret"] = ClientSecret
 					}
 				);
 
