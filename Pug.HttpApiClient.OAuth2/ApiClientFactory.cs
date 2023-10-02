@@ -15,8 +15,8 @@ namespace Pug.HttpApiClient.OAuth2
 		protected IHttpClientFactory HttpClientFactory { get; }
 		protected IHttpRequestMessageDecorator OAuthClientCredentialsDecorator { get; }
 
-		protected ApiClientFactory( Uri url, Uri oAuth2ProviderUrl, string clientId, string clientSecret, string oAuth2Scopes,
-									IHttpClientFactory httpClientFactory )
+		protected ApiClientFactory( Uri url, Uri oAuth2ProviderUrl, string clientId, string clientSecret, 
+									string oAuth2Scopes, IHttpClientFactory httpClientFactory )
 		{
 			ClientId = clientId;
 			ClientSecret = clientSecret;
@@ -44,6 +44,15 @@ namespace Pug.HttpApiClient.OAuth2
 					new TokenExchangeCredentialsDecorator( OAuth2ProviderUrl, ClientId, ClientSecret,
 															OAuth2Scopes, tokenExchangeSubjectTokenSource,
 															HttpClientFactory )
+				);
+		}
+
+		public virtual TClient GetClient( IRefreshTokenManager refreshTokenManager )
+		{
+			return GetClient(
+					new AccessTokenMessageDecorator(
+							refreshTokenManager
+						)
 				);
 		}
 

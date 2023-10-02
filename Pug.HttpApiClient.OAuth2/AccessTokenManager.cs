@@ -6,7 +6,7 @@ using Pug.HttpApiClient.Json;
 
 namespace Pug.HttpApiClient.OAuth2
 {
-	public abstract class AccessTokenManager<TToken> : IAccessTokenManager<TToken>
+	public abstract class AccessTokenManager<TToken> : IAccessTokenProvider<TToken>
 		where TToken : AccessToken
 	{
 		private readonly SemaphoreSlim _accessTokenRequestSync = new ( 1, 1 );

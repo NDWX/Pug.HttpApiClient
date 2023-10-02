@@ -1,6 +1,6 @@
 ﻿namespace Pug.HttpApiClient.OAuth2
 {
-	public interface IClientAccessTokenManager : IAccessTokenManager<AccessToken>
+	public interface IClientAccessTokenManager : IAccessTokenProvider<AccessToken>
 	{
 	}
 }

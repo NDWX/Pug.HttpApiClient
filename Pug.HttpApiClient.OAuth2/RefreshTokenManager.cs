@@ -9,7 +9,7 @@ using Newtonsoft.Json;
 
 namespace Pug.HttpApiClient.OAuth2
 {
-	public class RefreshTokenManager : AccessTokenManager<AccessToken>
+	public class RefreshTokenManager : AccessTokenManager<AccessToken>, IRefreshTokenManager
 	{
 		private readonly string _clientId;
 		private readonly string _clientSecret;

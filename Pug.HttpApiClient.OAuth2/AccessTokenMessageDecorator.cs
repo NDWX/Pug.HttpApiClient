@@ -6,9 +6,9 @@ namespace Pug.HttpApiClient.OAuth2
 {
 	public class AccessTokenMessageDecorator : IHttpRequestMessageDecorator
 	{
-		private readonly IAccessTokenManager<AccessToken> _accessTokenManager;
+		private readonly IAccessTokenProvider<AccessToken> _accessTokenManager;
 
-		public AccessTokenMessageDecorator( IAccessTokenManager<AccessToken> accessTokenManager )
+		public AccessTokenMessageDecorator( IAccessTokenProvider<AccessToken> accessTokenManager )
 		{
 			_accessTokenManager = accessTokenManager ?? throw new ArgumentNullException( nameof(accessTokenManager) );
 		}

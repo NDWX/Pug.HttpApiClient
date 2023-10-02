@@ -2,9 +2,10 @@ using System.Threading.Tasks;
 
 namespace Pug.HttpApiClient.OAuth2
 {
-	public interface IAccessTokenManager<TAccessToken>
+	public interface IAccessTokenProvider<TAccessToken>
 	{
 		TAccessToken GetAccessToken();
+		
 		Task<TAccessToken> GetAccessTokenAsync();
 		
 	}
