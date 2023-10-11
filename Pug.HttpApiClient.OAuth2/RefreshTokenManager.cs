@@ -15,7 +15,7 @@ namespace Pug.HttpApiClient.OAuth2
 		private readonly string _clientSecret;
 		private readonly string _scopes;
 		protected RefreshableAccessToken AccessToken { get; set; }
-		protected ClientCredentialsDecorator ClientCredentialsDecorator { get; }
+		protected IHttpRequestMessageDecorator ClientCredentialsDecorator { get; }
 
 		public const string GrantType = "refresh_token";
 		
@@ -43,7 +43,7 @@ namespace Pug.HttpApiClient.OAuth2
 			_scopes = oAuth2Scopes;
 
 			ClientCredentialsDecorator =
-				new ClientCredentialsDecorator( oAuth2Endpoint, clientId, clientSecret, oAuth2Scopes, httpClientFactory );
+				new BasicAuthenticationMessageDecorator( clientId, clientSecret );
 
 			AccessToken = refreshTokenSource(this) ?? throw new AccessTokenException();
 		}
@@ -68,6 +68,7 @@ namespace Pug.HttpApiClient.OAuth2
 							openIdConfiguration.TokenEndpoint, HttpClientFactory,
 							messageDecorators: useClientCredentials? new[] { ClientCredentialsDecorator } : null
 						);
+				
 				responseMessage =
 					httpApiClient.PostAsync( string.Empty,
 											formUrlEncodedContent,
