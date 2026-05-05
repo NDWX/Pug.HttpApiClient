@@ -149,7 +149,7 @@ namespace Pug.HttpApiClient
 				switch( responseMessage.StatusCode )
 				{
 					case HttpStatusCode.Forbidden:
-						throw new Application.Security.NotAuthorized( responseMessage.ReasonPhrase );
+						throw new AuthorizationException( responseMessage.ReasonPhrase );
 
 					case HttpStatusCode.Gone:
 						throw new UnknownResourceException( responseMessage );
