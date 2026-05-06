@@ -1,23 +1,23 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>netstandard2.0;netcoreapp2.1</TargetFrameworks>
+		<TargetFrameworks>netstandard2.0;netcoreapp2.1;netcoreapp3.1;net5.0;net6.0;net8.0;net10.0</TargetFrameworks>
 		<AssemblyName>Pug.HttpApiClient.Common</AssemblyName>
 		<RootNamespace>Pug.HttpApiClient</RootNamespace>
 		<Title>Pug.HttpApiClient.Common</Title>
 		<Authors>Andrian</Authors>
 		<Description>HTTP API client common library</Description>
-		<AssemblyVersion>0.4.5</AssemblyVersion>
-		<FileVersion>0.4.5</FileVersion>
+		<AssemblyVersion>0.5.0.0</AssemblyVersion>
+		<FileVersion>0.5.0.0</FileVersion>
 		<RepositoryUrl>https://github.com/NDWX/Pug.HttpApiClient.git</RepositoryUrl>
 		<RepositoryType>Git</RepositoryType>
-		<PackageVersion>0.4.5</PackageVersion>
+		<PackageVersion>0.5.0</PackageVersion>
 		<PackageId>Pug.HttpApiClient.Common</PackageId>
 		<PackageTags>Pug HTTP API Client Common Types Library</PackageTags>
 		<PackageLicenseExpression>AGPL-3.0-or-later</PackageLicenseExpression>
 		<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
 		<PackageReleaseNotes>
-			Upgraded Microsoft.Extensions.Http to v3.1.32.
+			Dependency alignment with target framework.
 		</PackageReleaseNotes>
 	</PropertyGroup>
 
@@ -29,8 +29,32 @@
 		<DocumentationFile>bin\Release\Pug.HttpApiClient.Common.xml</DocumentationFile>
 	</PropertyGroup>
 
-	<ItemGroup>
-		<PackageReference Include="Microsoft.Extensions.Http" Version="3.1.32" />
+	<ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
+		<PackageReference Include="Microsoft.Extensions.Http" Version="2.2.0" />
+	</ItemGroup>
+	
+	<ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.1' ">
+		<PackageReference Include="Microsoft.Extensions.Http" Version="2.2.0" />
+	</ItemGroup>
+	
+	<ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp3.1' ">
+		<PackageReference Include="Microsoft.Extensions.Http" Version="3.0.0" />
+	</ItemGroup>
+	
+	<ItemGroup Condition=" '$(TargetFramework)' == 'net5.0' ">
+		<PackageReference Include="Microsoft.Extensions.Http" Version="5.0.0" />
+	</ItemGroup>
+
+	<ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
+		<PackageReference Include="Microsoft.Extensions.Http" Version="6.0.0" />
+	</ItemGroup>
+
+	<ItemGroup Condition=" '$(TargetFramework)' == 'net8.0' ">
+		<PackageReference Include="Microsoft.Extensions.Http" Version="8.0.0" />
+	</ItemGroup>
+
+	<ItemGroup Condition=" '$(TargetFramework)' == 'net10.0' ">
+		<PackageReference Include="Microsoft.Extensions.Http" Version="10.0.0" />
 	</ItemGroup>
 
 </Project>

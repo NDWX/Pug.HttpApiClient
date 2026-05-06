@@ -5,7 +5,11 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Authentication;
 using System.Threading.Tasks;
+#if (NETCOREAPP2_1 || NETSTANDARD)
 using Newtonsoft.Json;
+#else
+using System.Text.Json;
+#endif
 
 namespace Pug.HttpApiClient.OAuth2
 {
@@ -78,11 +82,15 @@ namespace Pug.HttpApiClient.OAuth2
 			switch( responseMessage.StatusCode )
 			{
 				case HttpStatusCode.BadRequest:
-
+#if NETCOREAPP2_1 || NETSTANDARD
 					TokenRequestError tokenRequestError = JsonConvert.DeserializeObject<TokenRequestError>(
 							responseMessage.Content.ReadAsStringAsync().ConfigureAwait( false ).GetAwaiter().GetResult()
 						);
-
+#else
+					TokenRequestError tokenRequestError = JsonSerializer.Deserialize<TokenRequestError>(
+							responseMessage.Content.ReadAsStringAsync().ConfigureAwait( false ).GetAwaiter().GetResult()
+						);
+#endif
 					throw new AuthenticationException( tokenRequestError.Message );
 
 				case HttpStatusCode.InternalServerError:
@@ -91,9 +99,11 @@ namespace Pug.HttpApiClient.OAuth2
 
 				case HttpStatusCode.OK:
 					string tokenJson = responseMessage.Content.ReadAsStringAsync().ConfigureAwait( false ).GetAwaiter().GetResult();
-
+#if NETCOREAPP2_1 || NETSTANDARD
 					return JsonConvert.DeserializeObject<AccessToken>( tokenJson );
-				
+#else
+					return JsonSerializer.Deserialize<AccessToken>( tokenJson );
+#endif
 				default:
 					throw new HttpApiRequestException(
 						$"Unexpected response status code received from OAuth2 provider: {( (int)responseMessage.StatusCode ).ToString()}", responseMessage );
@@ -134,10 +144,15 @@ namespace Pug.HttpApiClient.OAuth2
 			switch( responseMessage.StatusCode )
 			{
 				case HttpStatusCode.BadRequest:
-
+#if NETCOREAPP2_1 || NETSTANDARD
 					TokenRequestError tokenRequestError = JsonConvert.DeserializeObject<TokenRequestError>(
 							await responseMessage.Content.ReadAsStringAsync()
 						);
+#else
+					TokenRequestError tokenRequestError = JsonSerializer.Deserialize<TokenRequestError>(
+							await responseMessage.Content.ReadAsStringAsync()
+						);
+#endif
 
 					throw new AuthenticationException( tokenRequestError.Message );
 
@@ -148,8 +163,12 @@ namespace Pug.HttpApiClient.OAuth2
 				case HttpStatusCode.OK:
 					string tokenJson = await responseMessage.Content.ReadAsStringAsync();
 
+#if NETCOREAPP2_1 || NETSTANDARD
 					return JsonConvert.DeserializeObject<AccessToken>( tokenJson );
-				
+#else
+					return JsonSerializer.Deserialize<AccessToken>( tokenJson );
+#endif
+					
 				default:
 					throw new HttpApiRequestException(
 						$"Unexpected response status code received from OAuth2 provider: {( (int)responseMessage.StatusCode ).ToString()}", responseMessage );
