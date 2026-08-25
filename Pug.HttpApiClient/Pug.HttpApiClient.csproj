@@ -23,11 +23,11 @@
 	</PropertyGroup>
 
 	<PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-	  <DocumentationFile>bin\Debug\Pug.HttpApiClient.xml</DocumentationFile>
+	  <DocumentationFile>bin/Debug/Pug.HttpApiClient.xml</DocumentationFile>
 	</PropertyGroup>
 
 	<PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-	  <DocumentationFile>bin\Release\Pug.HttpApiClient.xml</DocumentationFile>
+	  <DocumentationFile>bin/Release/Pug.HttpApiClient.xml</DocumentationFile>
 	</PropertyGroup>
 
 	<ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
@@ -39,7 +39,7 @@
 	</ItemGroup>
 	
 	<ItemGroup>
-	  <ProjectReference Include="..\Pug.HttpApiClient.Common\Pug.HttpApiClient.Common.csproj" />
+	  <ProjectReference Include="../Pug.HttpApiClient.Common/Pug.HttpApiClient.Common.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

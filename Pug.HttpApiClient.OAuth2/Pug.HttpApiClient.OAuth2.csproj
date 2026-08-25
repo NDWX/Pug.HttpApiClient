@@ -22,16 +22,16 @@
 	</PropertyGroup>
 
 	<PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-	  <DocumentationFile>bin\Debug\Pug.HttpApiClient.OAuth2.xml</DocumentationFile>
+	  <DocumentationFile>bin/Debug/Pug.HttpApiClient.OAuth2.xml</DocumentationFile>
 	</PropertyGroup>
 
 	<PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-	  <DocumentationFile>bin\Release\Pug.HttpApiClient.OAuth2.xml</DocumentationFile>
+	  <DocumentationFile>bin/Release/Pug.HttpApiClient.OAuth2.xml</DocumentationFile>
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\Pug.HttpApiClient.Common\Pug.HttpApiClient.Common.csproj" />
-	  <ProjectReference Include="..\Pug.HttpApiClient\Pug.HttpApiClient.csproj" />
+	  <ProjectReference Include="../Pug.HttpApiClient.Common/Pug.HttpApiClient.Common.csproj" />
+	  <ProjectReference Include="../Pug.HttpApiClient/Pug.HttpApiClient.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
