@@ -1,18 +1,24 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Security.Authentication;
 using System.Threading.Tasks;
-#if NETCOREAPP2_1 || NETSTANDARD
-using Newtonsoft.Json;
-#else
-using System.Text.Json;
-#endif
 
 namespace Pug.HttpApiClient.OAuth2
 {
+	/// <remarks>
+	/// DIVERGENCE - this manager authenticates the client with <c>client_secret_post</c> (client_id and
+	/// client_secret as form fields in the request body), whereas ClientAccessTokenManager and
+	/// RefreshTokenManager use <c>client_secret_basic</c> (an HTTP Basic header, via
+	/// BasicAuthenticationMessageDecorator). No decorator is attached to the token request here.
+	///
+	/// Unlike the other divergences recorded in this assembly, this one is defensible: RFC 6749 section 2.3.1
+	/// permits both methods, and RFC 8693 token-exchange examples conventionally show the body form. It is
+	/// documented only because the three managers in this assembly now authenticate the client three
+	/// different ways, which is surprising to a reader and matters when a provider is configured to accept
+	/// exactly one method - a client registered for client_secret_basic will reject this manager's requests,
+	/// and vice versa. Changing it would break anyone whose provider is configured for the current method.
+	/// </remarks>
 	public sealed class TokenExchangeAccessTokenManager : AccessTokenManager<AccessToken>
 	{
 		private readonly string _clientId;
@@ -60,7 +66,7 @@ namespace Pug.HttpApiClient.OAuth2
 
 			try
 			{
-				IHttpApiClient httpApiClient = new HttpApiClient( openIdConfiguration.TokenEndpoint, HttpClientFactory);
+				IHttpApiClient httpApiClient = new TokenEndpointHttpApiClient( openIdConfiguration.TokenEndpoint, HttpClientFactory );
 				
 				responseMessage =
 					httpApiClient.PostAsync( string.Empty, new FormUrlEncodedContent(
@@ -91,39 +97,10 @@ namespace Pug.HttpApiClient.OAuth2
 				throw;
 			}
 
-			// ReSharper disable once SwitchStatementMissingSomeEnumCasesNoDefault
-			switch( responseMessage.StatusCode )
-			{
-				case HttpStatusCode.BadRequest:
-
-					#if NETCOREAPP2_1 || NETSTANDARD
-					TokenRequestError tokenRequestError = JsonConvert.DeserializeObject<TokenRequestError>(
-							responseMessage.Content.ReadAsStringAsync().ConfigureAwait( false ).GetAwaiter().GetResult()
-						);
-					#else
-					TokenRequestError tokenRequestError = JsonSerializer.Deserialize<TokenRequestError>(
-							responseMessage.Content.ReadAsStringAsync().ConfigureAwait( false ).GetAwaiter().GetResult()
-						);
-
-					#endif
-
-					throw new AuthenticationException( tokenRequestError.Message );
-				
-				case HttpStatusCode.InternalServerError:
-
-					throw new HttpApiRequestException(responseMessage);
-
-				case HttpStatusCode.OK:
-					string tokenJson = responseMessage.Content.ReadAsStringAsync().ConfigureAwait( false ).GetAwaiter().GetResult();
-#if NETCOREAPP2_1 || NETSTANDARD
-					return JsonConvert.DeserializeObject<AccessToken>( tokenJson );
-#else
-					return JsonSerializer.Deserialize<AccessToken>( tokenJson );
-#endif
-				default:
-					throw new HttpApiRequestException(
-						$"Unexpected response status code received from OAuth2 provider: {( (int)responseMessage.StatusCode ).ToString()}", responseMessage );
-			}
+			return HandleTokenResponse<AccessToken>(
+					responseMessage,
+					responseMessage.Content.ReadAsStringAsync().ConfigureAwait( false ).GetAwaiter().GetResult()
+				);
 		}
 
 		protected override async Task<AccessToken> GetNewAccessTokenAsync()
@@ -133,7 +110,7 @@ namespace Pug.HttpApiClient.OAuth2
 
 			try
 			{
-				IHttpApiClient httpApiClient = new HttpApiClient( openIdConfiguration.TokenEndpoint, HttpClientFactory);
+				IHttpApiClient httpApiClient = new TokenEndpointHttpApiClient( openIdConfiguration.TokenEndpoint, HttpClientFactory );
 				
 				responseMessage =
 					await httpApiClient.PostAsync( string.Empty, new FormUrlEncodedContent(
@@ -161,36 +138,10 @@ namespace Pug.HttpApiClient.OAuth2
 				throw;
 			}
 
-			// ReSharper disable once 
-			switch( responseMessage.StatusCode )
-			{
-				case HttpStatusCode.BadRequest:
-#if NETCOREAPP2_1 || NETSTANDARD
-					TokenRequestError tokenRequestError = JsonConvert.DeserializeObject<TokenRequestError>(
-							await responseMessage.Content.ReadAsStringAsync()
-						);
-#else
-					TokenRequestError tokenRequestError = JsonSerializer.Deserialize<TokenRequestError>(
-							await responseMessage.Content.ReadAsStringAsync()
-						);
-#endif
-					throw new AuthenticationException( tokenRequestError.Message );
-
-				case HttpStatusCode.InternalServerError:
-
-					throw new HttpRequestException();
-
-				case HttpStatusCode.OK:
-					string tokenJson = await responseMessage.Content.ReadAsStringAsync();
-#if NETCOREAPP2_1 || NETSTANDARD
-					return JsonConvert.DeserializeObject<AccessToken>( tokenJson );
-#else
-					return JsonSerializer.Deserialize<AccessToken>( tokenJson );
-#endif
-				default:
-					throw new HttpApiRequestException(
-						$"Unexpected response status code received from OAuth2 provider: {( (int)responseMessage.StatusCode ).ToString()}", responseMessage );
-			}
+			return HandleTokenResponse<AccessToken>(
+					responseMessage,
+					await responseMessage.Content.ReadAsStringAsync()
+				);
 		}
 	}
 }

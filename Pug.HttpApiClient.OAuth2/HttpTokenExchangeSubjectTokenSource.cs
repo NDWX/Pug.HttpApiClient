@@ -22,9 +22,10 @@ namespace Pug.HttpApiClient.OAuth2
 
 			string value = values.First();
 
+			// the StartsWith( "BEARER " ) guard above guarantees a separator exists
 			int separatorIndex = value.IndexOf( " ", StringComparison.InvariantCulture );
-			
-			return value.Substring( separatorIndex, value.Length - ( separatorIndex + 1 ) );
+
+			return value.Substring( separatorIndex + 1 );
 		}
 	}
 }

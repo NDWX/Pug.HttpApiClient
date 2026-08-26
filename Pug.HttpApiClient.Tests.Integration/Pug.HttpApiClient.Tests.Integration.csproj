@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<LangVersion>latest</LangVersion>
+		<Nullable>disable</Nullable>
+		<ImplicitUsings>disable</ImplicitUsings>
+		<IsPackable>false</IsPackable>
+		<RootNamespace>Pug.HttpApiClient.Tests.Integration</RootNamespace>
+		<NoWarn>$(NoWarn);CS1591</NoWarn>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+		<PackageReference Include="xunit" Version="2.9.3" />
+		<PackageReference Include="xunit.runner.visualstudio" Version="3.1.5" />
+		<PackageReference Include="Testcontainers" Version="4.6.0" />
+		<PackageReference Include="Xunit.SkippableFact" Version="1.5.23" />
+		<PackageReference Include="Microsoft.Extensions.Http" Version="10.0.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="../Pug.HttpApiClient/Pug.HttpApiClient.csproj" />
+		<ProjectReference Include="../Pug.HttpApiClient.Common/Pug.HttpApiClient.Common.csproj" />
+		<ProjectReference Include="../Pug.HttpApiClient.OAuth2/Pug.HttpApiClient.OAuth2.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Update="acme-realm.json" CopyToOutputDirectory="PreserveNewest" />
+	</ItemGroup>
+
+</Project>

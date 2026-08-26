@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<!--
+		Runs on a modern test host, but binds the library compiled as netstandard2.0 so the
+		#if NETCOREAPP2_1 || NETSTANDARD branches (Newtonsoft.Json, trimmed status mapping) are the
+		code under test. Those branches are selected at COMPILE time, and a netstandard2.0 assembly
+		loads fine on .NET 10, so no legacy runtime or legacy test tooling is involved.
+	-->
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<LangVersion>latest</LangVersion>
+		<Nullable>disable</Nullable>
+		<ImplicitUsings>disable</ImplicitUsings>
+		<IsPackable>false</IsPackable>
+		<RootNamespace>Pug.HttpApiClient.Tests.NetStandard</RootNamespace>
+		<NoWarn>$(NoWarn);CS1591</NoWarn>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+		<PackageReference Include="xunit" Version="2.9.3" />
+		<PackageReference Include="xunit.runner.visualstudio" Version="3.1.5" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="../Pug.HttpApiClient/Pug.HttpApiClient.csproj"
+							SetTargetFramework="TargetFramework=netstandard2.0" />
+		<ProjectReference Include="../Pug.HttpApiClient.Common/Pug.HttpApiClient.Common.csproj"
+							SetTargetFramework="TargetFramework=netstandard2.0" />
+		<ProjectReference Include="../Pug.HttpApiClient.OAuth2/Pug.HttpApiClient.OAuth2.csproj"
+							SetTargetFramework="TargetFramework=netstandard2.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Compile Include="../Pug.HttpApiClient.Tests/Infrastructure/*.cs"
+					Link="Infrastructure/%(Filename)%(Extension)" />
+	</ItemGroup>
+
+</Project>

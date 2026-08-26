@@ -1,15 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Security.Authentication;
 using System.Threading.Tasks;
-#if NETCOREAPP2_1 || NETSTANDARD
-using Newtonsoft.Json;
-#else
-using System.Text.Json;
-#endif
 
 namespace Pug.HttpApiClient.OAuth2
 {
@@ -59,6 +52,12 @@ namespace Pug.HttpApiClient.OAuth2
 		{
 		}
 
+		/// <remarks>
+		/// Serves two roles: the constructor-time INITIAL grant for PasswordAccessTokenManager and
+		/// AuthorizationCodeTokenManager - which is why it takes <paramref name="useClientCredentials"/>, as
+		/// those grants authenticate with client_secret_basic - and the refresh grant. Returns
+		/// <see cref="RefreshableAccessToken"/> so both roles can see the provider's refresh token.
+		/// </remarks>
 		protected internal virtual RefreshableAccessToken GetAccessToken( FormUrlEncodedContent formUrlEncodedContent, bool useClientCredentials = false )
 		{
 			OpenIdConfiguration openIdConfiguration = GetOpenIdConfiguration();
@@ -68,9 +67,9 @@ namespace Pug.HttpApiClient.OAuth2
 			try
 			{
 				IHttpApiClient httpApiClient =
-					new HttpApiClient(
+					new TokenEndpointHttpApiClient(
 							openIdConfiguration.TokenEndpoint, HttpClientFactory,
-							messageDecorators: useClientCredentials? new[] { ClientCredentialsDecorator } : null
+							useClientCredentials? new[] { ClientCredentialsDecorator } : null
 						);
 				
 				responseMessage =
@@ -93,47 +92,34 @@ namespace Pug.HttpApiClient.OAuth2
 				throw;
 			}
 
-			// ReSharper disable once SwitchStatementMissingSomeEnumCasesNoDefault
-			switch( responseMessage.StatusCode )
-			{
-				case HttpStatusCode.BadRequest:
-#if NETCOREAPP2_1 || NETSTANDARD
-					TokenRequestError tokenRequestError = JsonConvert.DeserializeObject<TokenRequestError>(
-							responseMessage.Content.ReadAsStringAsync().ConfigureAwait( false ).GetAwaiter().GetResult()
-						);
-#else
-					TokenRequestError tokenRequestError = JsonSerializer.Deserialize<TokenRequestError>(
-							responseMessage.Content.ReadAsStringAsync().ConfigureAwait( false ).GetAwaiter().GetResult()
-						);
-#endif
-
-					throw new AuthenticationException( tokenRequestError.Message );
-
-				case HttpStatusCode.InternalServerError:
-
-					throw new HttpApiRequestException( responseMessage );
-
-				case HttpStatusCode.OK:
-					string tokenJson = responseMessage.Content.ReadAsStringAsync().ConfigureAwait( false ).GetAwaiter().GetResult();
-#if NETCOREAPP2_1 || NETSTANDARD
-					return JsonConvert.DeserializeObject<RefreshableAccessToken>( tokenJson );
-#else
-				return JsonSerializer.Deserialize<RefreshableAccessToken>( tokenJson );
-#endif
-				default:
-					throw new HttpApiRequestException(
-						$"Unexpected response status code received from OAuth2 provider: {( (int)responseMessage.StatusCode ).ToString()}",
-						responseMessage );
-			}
+			return HandleTokenResponse<RefreshableAccessToken>(
+					responseMessage,
+					responseMessage.Content.ReadAsStringAsync().ConfigureAwait( false ).GetAwaiter().GetResult()
+				);
 		}
 
-		protected internal virtual async Task<AccessToken> GetAccessTokenAsync( FormUrlEncodedContent formUrlEncodedContent)
+		/// <remarks>
+		/// Serves the REFRESH grant only, which is the one way it differs from the synchronous
+		/// <see cref="GetAccessToken"/>: there is no <c>useClientCredentials</c> parameter and no Basic auth
+		/// header, because the refresh grant built by <see cref="GetNewAccessTokenAsync"/> carries
+		/// client_id/client_secret as form fields (client_secret_post). The sync overload needs that
+		/// parameter because it ALSO serves the constructor-time initial grant for PasswordAccessTokenManager
+		/// and AuthorizationCodeTokenManager, which authenticate with client_secret_basic. There is no async
+		/// initial-grant path because those grants are issued from constructors, which cannot await.
+		///
+		/// Both overloads return <see cref="RefreshableAccessToken"/>, so a refresh token the provider
+		/// rotated is visible to the caller and can be adopted by
+		/// <see cref="RetainRotatedRefreshToken"/>. Deserializing a plain <see cref="AccessToken"/> here
+		/// would make rotation impossible on the async path.
+		/// </remarks>
+		protected internal virtual async Task<RefreshableAccessToken> GetAccessTokenAsync( FormUrlEncodedContent formUrlEncodedContent)
 		{
 			OpenIdConfiguration openIdConfiguration = await GetOpenIdConfigurationAsync();
 			HttpResponseMessage responseMessage;
+			
 			try
 			{
-				IHttpApiClient httpApiClient = new HttpApiClient( openIdConfiguration.TokenEndpoint, HttpClientFactory );
+				IHttpApiClient httpApiClient = new TokenEndpointHttpApiClient( openIdConfiguration.TokenEndpoint, HttpClientFactory );
 
 				responseMessage =
 					await httpApiClient.PostAsync( string.Empty, formUrlEncodedContent, _jsonMediaType, null, null );
@@ -150,37 +136,33 @@ namespace Pug.HttpApiClient.OAuth2
 				throw;
 			}
 
-			// ReSharper disable once 
-			switch( responseMessage.StatusCode )
-			{
-				case HttpStatusCode.BadRequest:
-#if NETCOREAPP2_1 || NETSTANDARD
-					TokenRequestError tokenRequestError = JsonConvert.DeserializeObject<TokenRequestError>(
-							await responseMessage.Content.ReadAsStringAsync()
-						);
-#else
-					TokenRequestError tokenRequestError = JsonSerializer.Deserialize<TokenRequestError>(
-							await responseMessage.Content.ReadAsStringAsync()
-						);
-#endif
-					throw new AuthenticationException( tokenRequestError.Message );
+			return HandleTokenResponse<RefreshableAccessToken>(
+					responseMessage,
+					await responseMessage.Content.ReadAsStringAsync()
+				);
+		}
 
-				case HttpStatusCode.InternalServerError:
+		/// <summary>
+		/// Adopt a refresh token the provider rotated, so the NEXT refresh presents the current token rather
+		/// than replaying the one this manager was seeded with.
+		/// </summary>
+		/// <remarks>
+		/// RFC 6749 section 6 lets an authorization server issue a new refresh token with each refresh
+		/// response, and a server configured for single-use refresh tokens (Keycloak's "Revoke Refresh Token")
+		/// rejects any token presented twice. Without this the second refresh fails with
+		/// <c>invalid_grant</c>. A response that carries no refresh_token means the server did not rotate,
+		/// so the existing token is kept.
+		///
+		/// Callers reach this while holding the base class's token semaphore, so the write is serialized.
+		/// </remarks>
+		/// <param name="refreshed">Token response received from the provider.</param>
+		/// <returns><paramref name="refreshed"/>, unchanged.</returns>
+		private RefreshableAccessToken RetainRotatedRefreshToken( RefreshableAccessToken refreshed )
+		{
+			if( !string.IsNullOrWhiteSpace( refreshed?.RefreshToken ) )
+				AccessToken = refreshed;
 
-					throw new HttpRequestException();
-
-				case HttpStatusCode.OK:
-					string tokenJson = await responseMessage.Content.ReadAsStringAsync();
-#if NETCOREAPP2_1 || NETSTANDARD
-					return JsonConvert.DeserializeObject<AccessToken>( tokenJson );
-#else
-					return JsonSerializer.Deserialize<AccessToken>( tokenJson );
-#endif
-				default:
-					throw new HttpApiRequestException(
-						$"Unexpected response status code received from OAuth2 provider: {( (int)responseMessage.StatusCode ).ToString()}",
-						responseMessage );
-			}
+			return refreshed;
 		}
 
 		protected override AccessToken GetNewAccessToken()
@@ -196,7 +178,7 @@ namespace Pug.HttpApiClient.OAuth2
 					}
 				);
 
-			return GetAccessToken( formUrlEncodedContent );
+			return RetainRotatedRefreshToken( GetAccessToken( formUrlEncodedContent ) );
 		}
 
 		protected override async Task<AccessToken> GetNewAccessTokenAsync()
@@ -212,7 +194,7 @@ namespace Pug.HttpApiClient.OAuth2
 					}
 				);
 
-			return await GetAccessTokenAsync( formUrlEncodedContent );
+			return RetainRotatedRefreshToken( await GetAccessTokenAsync( formUrlEncodedContent ) );
 		}
 	}
 }

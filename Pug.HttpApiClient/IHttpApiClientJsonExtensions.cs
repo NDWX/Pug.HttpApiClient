@@ -64,8 +64,22 @@ namespace Pug.HttpApiClient.Json
 		/// <summary>
 		/// Set default JsonSerializerOptions used for JSON serialization/deserialization
 		/// </summary>
-		/// <param name="httpApiClient"></param>
-		/// <param name="jsonSerializerOptions"></param>
+		/// <remarks>
+		/// DIVERGENCE - the signature reads as per-client configuration (an extension method taking an
+		/// <see cref="IHttpApiClient"/> receiver), but the receiver is never used: this assigns a private
+		/// STATIC field, so the effect is process-wide and calling it on one client silently changes
+		/// serialization for every other client in the process. The netstandard2.0/netcoreapp2.1 counterpart
+		/// of this method, SetJsonSerializerSettings, is a plain static with no receiver - so the two target
+		/// frameworks disagree on the shape as well.
+		///
+		/// Confirmed as a deliberate style choice by the maintainer rather than an oversight, and kept for
+		/// binary compatibility. Recommended shape if it is ever revisited: drop the unused receiver and make
+		/// it a plain static to match the legacy branch, or give IHttpApiClient genuine per-instance options.
+		/// Pinned by Tests/Json/SerializerOptionsTests
+		///   .SetJsonSerializerOptions_CalledOnOneClient_AffectsEveryClientGlobally.
+		/// </remarks>
+		/// <param name="httpApiClient">Unused. Present only to make this an extension method.</param>
+		/// <param name="jsonSerializerOptions">Options to apply process-wide.</param>
 		public static void SetJsonSerializerOptions(this IHttpApiClient httpApiClient, JsonSerializerOptions jsonSerializerOptions )
 		{
 			defaultJsonSerializerOptions = jsonSerializerOptions;
@@ -84,9 +98,9 @@ namespace Pug.HttpApiClient.Json
 			string contentJson;
 
 #if NETCOREAPP2_1 || NETSTANDARD
-			contentJson = JsonConvert.SerializeObject( content, jsonSerializerSettings );
+			contentJson = JsonConvert.SerializeObject( content, jsonSerializerSettings ?? defaultJsonSerializerSettings );
 #else
-			contentJson = JsonSerializer.Serialize( content, defaultJsonSerializerOptions?? jsonSerializerOptions );
+			contentJson = JsonSerializer.Serialize( content, jsonSerializerOptions ?? defaultJsonSerializerOptions );
 #endif
 			HttpContent httpContent = new StringContent( contentJson );
 			httpContent.Headers.ContentType = MediaType;
@@ -305,7 +319,11 @@ namespace Pug.HttpApiClient.Json
 #endif
 			)
 		{
-			HttpContent httpContent = CreateHttpContent<TContent>( content );
+#if NETCOREAPP2_1 || NETSTANDARD 
+			HttpContent httpContent = CreateHttpContent<TContent>( content, jsonSerializerSettings );
+#else
+			HttpContent httpContent = CreateHttpContent<TContent>( content, jsonSerializerOptions );
+#endif
 
 			HttpResponseMessage response = await httpApiClient.PutAsync( path, httpContent, MediaType, headers, queries );
 
@@ -371,7 +389,11 @@ namespace Pug.HttpApiClient.Json
 #endif
 			)
 		{
-			HttpContent httpContent = CreateHttpContent<TContent>( content );
+#if NETCOREAPP2_1 || NETSTANDARD 
+			HttpContent httpContent = CreateHttpContent<TContent>( content, jsonSerializerSettings );
+#else
+			HttpContent httpContent = CreateHttpContent<TContent>( content, jsonSerializerOptions );
+#endif
 
 			HttpResponseMessage response = await httpApiClient.PatchAsync( path, httpContent, MediaType, headers, queries );
 

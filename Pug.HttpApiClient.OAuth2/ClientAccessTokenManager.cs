@@ -1,15 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Security.Authentication;
 using System.Threading.Tasks;
-#if (NETCOREAPP2_1 || NETSTANDARD)
-using Newtonsoft.Json;
-#else
-using System.Text.Json;
-#endif
 
 namespace Pug.HttpApiClient.OAuth2
 {
@@ -17,7 +10,19 @@ namespace Pug.HttpApiClient.OAuth2
 	{
 		private readonly BasicAuthenticationMessageDecorator _clientCredentialsMessageDecorator;
 		private readonly MediaTypeWithQualityHeaderValue _jsonMediaType = new ( "*/*" );
-		private readonly FormUrlEncodedContent _clientTokenRequestContent;
+		// Held as the raw field set and turned into a fresh FormUrlEncodedContent per request.
+		//
+		// This was changed from a cached FormUrlEncodedContent on the belief that HttpClient disposes request
+		// content after sending, making the second token request throw ObjectDisposedException. MUTATION
+		// TESTING DISPROVED THAT: re-introducing the cached instance breaks nothing, in the stub-backed tests
+		// or against real Keycloak. FormUrlEncodedContent derives from ByteArrayContent, whose byte[] survives
+		// disposal, so it is safely re-sendable - the "never reuse HttpContent" rule applies to stream-backed
+		// content, not this.
+		//
+		// Kept because it costs nothing (token requests are infrequent, the payload is tiny) and it matches
+		// RefreshTokenManager and TokenExchangeAccessTokenManager, which already build their content per call.
+		// Reverting to a cached instance would also be correct.
+		private readonly IDictionary<string, string> _clientTokenRequestFields;
 		
 		public ClientAccessTokenManager( Uri oAuth2Endpoint, string clientId, string clientSecret, string scopes,
 										IHttpClientFactory httpClientFactory ) 
@@ -32,13 +37,11 @@ namespace Pug.HttpApiClient.OAuth2
 			ClientId = clientId;
 
 			_clientCredentialsMessageDecorator = new BasicAuthenticationMessageDecorator( clientId, clientSecret );
-			_clientTokenRequestContent = new FormUrlEncodedContent(
-					new Dictionary<string, string>
-					{
-						["grant_type"] = "client_credentials",
-						["scope"] = scopes
-					}
-				);
+			_clientTokenRequestFields = new Dictionary<string, string>
+				{
+					["grant_type"] = "client_credentials",
+					["scope"] = scopes
+				};
 		}
 		
 		public string ClientId { get; }
@@ -51,14 +54,14 @@ namespace Pug.HttpApiClient.OAuth2
 			
 			try
 			{
-				IHttpApiClient httpApiClient = new HttpApiClient(
+				IHttpApiClient httpApiClient = new TokenEndpointHttpApiClient(
 						openIdConfiguration.TokenEndpoint,
 						HttpClientFactory,
-						messageDecorators: new[] { _clientCredentialsMessageDecorator }
+						new IHttpRequestMessageDecorator[] { _clientCredentialsMessageDecorator }
 					);
 
 				responseMessage = httpApiClient.PostAsync(
-													string.Empty , _clientTokenRequestContent, _jsonMediaType,
+													string.Empty , new FormUrlEncodedContent( _clientTokenRequestFields ), _jsonMediaType,
 													null, null )
 
 												.ConfigureAwait( false )
@@ -78,36 +81,10 @@ namespace Pug.HttpApiClient.OAuth2
 				throw;
 			}
 
-			// ReSharper disable once SwitchStatementMissingSomeEnumCasesNoDefault
-			switch( responseMessage.StatusCode )
-			{
-				case HttpStatusCode.BadRequest:
-#if NETCOREAPP2_1 || NETSTANDARD
-					TokenRequestError tokenRequestError = JsonConvert.DeserializeObject<TokenRequestError>(
-							responseMessage.Content.ReadAsStringAsync().ConfigureAwait( false ).GetAwaiter().GetResult()
-						);
-#else
-					TokenRequestError tokenRequestError = JsonSerializer.Deserialize<TokenRequestError>(
-							responseMessage.Content.ReadAsStringAsync().ConfigureAwait( false ).GetAwaiter().GetResult()
-						);
-#endif
-					throw new AuthenticationException( tokenRequestError.Message );
-
-				case HttpStatusCode.InternalServerError:
-
-					throw new HttpApiRequestException(responseMessage);
-
-				case HttpStatusCode.OK:
-					string tokenJson = responseMessage.Content.ReadAsStringAsync().ConfigureAwait( false ).GetAwaiter().GetResult();
-#if NETCOREAPP2_1 || NETSTANDARD
-					return JsonConvert.DeserializeObject<AccessToken>( tokenJson );
-#else
-					return JsonSerializer.Deserialize<AccessToken>( tokenJson );
-#endif
-				default:
-					throw new HttpApiRequestException(
-						$"Unexpected response status code received from OAuth2 provider: {( (int)responseMessage.StatusCode ).ToString()}", responseMessage );
-			}
+			return HandleTokenResponse<AccessToken>(
+					responseMessage,
+					responseMessage.Content.ReadAsStringAsync().ConfigureAwait( false ).GetAwaiter().GetResult()
+				);
 		}
 
 		protected override async Task<AccessToken> GetNewAccessTokenAsync()
@@ -118,14 +95,14 @@ namespace Pug.HttpApiClient.OAuth2
 			
 			try
 			{
-				IHttpApiClient httpApiClient = new HttpApiClient(
+				IHttpApiClient httpApiClient = new TokenEndpointHttpApiClient(
 						openIdConfiguration.TokenEndpoint,
 						HttpClientFactory,
-						messageDecorators: new[] { _clientCredentialsMessageDecorator }
+						new IHttpRequestMessageDecorator[] { _clientCredentialsMessageDecorator }
 					);
 				
 				responseMessage =
-					await httpApiClient.PostAsync( string.Empty, _clientTokenRequestContent, _jsonMediaType, null, null );
+					await httpApiClient.PostAsync( string.Empty, new FormUrlEncodedContent( _clientTokenRequestFields ), _jsonMediaType, null, null );
 
 			}
 			catch( TaskCanceledException )
@@ -140,39 +117,10 @@ namespace Pug.HttpApiClient.OAuth2
 				throw;
 			}
 
-			// ReSharper disable once 
-			switch( responseMessage.StatusCode )
-			{
-				case HttpStatusCode.BadRequest:
-#if NETCOREAPP2_1 || NETSTANDARD
-					TokenRequestError tokenRequestError = JsonConvert.DeserializeObject<TokenRequestError>(
-							await responseMessage.Content.ReadAsStringAsync()
-						);
-#else
-					TokenRequestError tokenRequestError = JsonSerializer.Deserialize<TokenRequestError>(
-							await responseMessage.Content.ReadAsStringAsync()
-						);
-#endif
-
-					throw new AuthenticationException( tokenRequestError.Message );
-
-				case HttpStatusCode.InternalServerError:
-
-					throw new HttpRequestException();
-
-				case HttpStatusCode.OK:
-					string tokenJson = await responseMessage.Content.ReadAsStringAsync();
-
-#if NETCOREAPP2_1 || NETSTANDARD
-					return JsonConvert.DeserializeObject<AccessToken>( tokenJson );
-#else
-					return JsonSerializer.Deserialize<AccessToken>( tokenJson );
-#endif
-					
-				default:
-					throw new HttpApiRequestException(
-						$"Unexpected response status code received from OAuth2 provider: {( (int)responseMessage.StatusCode ).ToString()}", responseMessage );
-			}
+			return HandleTokenResponse<AccessToken>(
+					responseMessage,
+					await responseMessage.Content.ReadAsStringAsync()
+				);
 		}
 	}
 }

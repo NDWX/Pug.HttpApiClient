@@ -21,26 +21,22 @@ namespace Pug.HttpApiClient
 
 		public Uri BaseUrl { get; }
 		
-		protected HttpApiClient( Uri baseUrl, IEnumerable<IHttpClientDecorator> clientDecorators = null,
+		public HttpApiClient( Uri baseUrl, IHttpClientFactory httpClientFactory, IEnumerable<IHttpClientDecorator> clientDecorators = null,
 							IEnumerable<IHttpRequestMessageDecorator> messageDecorators = null )
 		{
 			BaseUrl = baseUrl ?? throw new ArgumentNullException( nameof(baseUrl) );
 
-			BaseAddress =  new Uri( 
-					baseUrl.AbsolutePath == "/" ? 
-						baseUrl.ToString() : baseUrl.ToString().Replace( baseUrl.AbsolutePath, string.Empty )  
-				);
+			_httpClientFactory = httpClientFactory ?? throw new ArgumentNullException( nameof(httpClientFactory) );
+			
+			// GetLeftPart( Authority ) yields scheme://[userinfo@]host[:port] directly. A string Replace of
+			// AbsolutePath is not equivalent: it strips *every* occurrence, so a base URL whose first path
+			// segment also appears in the authority (e.g. https://auth.example.com/auth) is mangled into
+			// "https:/.example.com" because "//auth.example.com" contains "/auth".
+			BaseAddress = new Uri( baseUrl.GetLeftPart( UriPartial.Authority ) );
 			
 			_clientDecorators = clientDecorators ?? Array.Empty<IHttpClientDecorator>();
- 			_messageDecorators = messageDecorators ?? Array.Empty<IHttpRequestMessageDecorator>();
+			_messageDecorators = messageDecorators ?? Array.Empty<IHttpRequestMessageDecorator>();
 			BasePath = baseUrl.AbsolutePath.TrimEnd('/');
-		}
-
-		public HttpApiClient( Uri baseUrl, IHttpClientFactory httpClientFactory, IEnumerable<IHttpClientDecorator> clientDecorators = null,
-							IEnumerable<IHttpRequestMessageDecorator> messageDecorators = null )
-		: this(baseUrl, clientDecorators, messageDecorators)
-		{
-			_httpClientFactory = httpClientFactory ?? throw new ArgumentNullException( nameof(httpClientFactory) );
 		}
 
 		public HttpApiClient( string baseUrl, IHttpClientFactory httpClientFactory, IEnumerable<IHttpClientDecorator> clientDecorators = null,
@@ -113,6 +109,15 @@ namespace Pug.HttpApiClient
 
 				await messageDecorator.DecorateAsync( messageDecorationContext ).ConfigureAwait( false );
 
+				// DIVERGENCE - uriQueries is REASSIGNED here, not accumulated. Each iteration unions the
+				// decorator's queries with the ORIGINAL caller queries, discarding whatever a previous
+				// decorator contributed, so with two or more query-contributing decorators only the last
+				// one's queries reach the URL. A single query-contributing decorator - the only arrangement
+				// used in this solution - behaves correctly, which is likely why this went unnoticed.
+				// Accumulating instead (uriQueries = uriQueries.Union( ... )) would fix it, but would change
+				// the URL of any existing caller that happens to rely on the current behaviour.
+				// Pinned by Tests/HttpApiClient/DecoratorTests
+				//   .MultipleQueryContributingDecorators_OnlyLastDecoratorQueriesSurvive.
 				if( messageDecorationContext.UrlQueries is not null )
 					uriQueries = queries is null ? messageDecorationContext.UrlQueries : queries.Union( messageDecorationContext.UrlQueries );
 			}
@@ -143,57 +148,70 @@ namespace Pug.HttpApiClient
 
 				HttpResponseMessage responseMessage = await client.SendAsync( requestMessage );
 
-				if( responseMessage.IsSuccessStatusCode )
-					return responseMessage;
-
-				switch( responseMessage.StatusCode )
-				{
-					case HttpStatusCode.Forbidden:
-						throw new AuthorizationException( responseMessage.ReasonPhrase );
-
-					case HttpStatusCode.Gone:
-						throw new UnknownResourceException( responseMessage );
-
-					case HttpStatusCode.Unauthorized:
-						throw new AuthenticationException();
-
-					case HttpStatusCode.BadGateway:
-						throw new HttpApiRequestException( responseMessage );
-
-					case HttpStatusCode.BadRequest:
-						throw new HttpApiRequestException( responseMessage );
-					
-					case HttpStatusCode.NotFound:
-						throw new UnknownResourceException( responseMessage );
-
-					case HttpStatusCode.MethodNotAllowed:
-						throw new HttpApiRequestException(
-								new InvalidOperationException( $"{requestMessage.Method.ToString()} method not allowed on resource" ),
-								responseMessage
-							);
-
-					case HttpStatusCode.Conflict:
-						throw new HttpApiRequestException( "Possible authentication/authorization or resource conflict error", responseMessage );
-
-#if !NETSTANDARD
-					case HttpStatusCode.Locked:
-						throw new HttpApiRequestException(
-							new InvalidOperationException( 
-								$"Resource cannot be modified: {responseMessage.StatusCode} ({responseMessage.ReasonPhrase})" ),
-							responseMessage );
-					
-					case HttpStatusCode.InsufficientStorage:
-						throw new InternalServerErrorException( responseMessage );
-#endif
-
-					case HttpStatusCode.NotImplemented:
-						throw new HttpApiRequestException( new NotImplementedException(), responseMessage );
-
-					case HttpStatusCode.InternalServerError:
-						throw new InternalServerErrorException( responseMessage );
-				}
+				EnsureSuccessResponse( requestMessage, responseMessage );
 
 				return responseMessage;
+			}
+		}
+
+		/// <summary>
+		/// Map an unsuccessful response status to the corresponding exception. Successful responses are
+		/// left alone. Override to suppress or alter the mapping - for example where the caller speaks a
+		/// protocol that assigns its own meaning to 4xx responses and needs the raw
+		/// <see cref="HttpResponseMessage"/> instead of an exception.
+		/// </summary>
+		/// <param name="requestMessage">Request that produced <paramref name="responseMessage"/>.</param>
+		/// <param name="responseMessage">Response received from the server.</param>
+		protected virtual void EnsureSuccessResponse( HttpRequestMessage requestMessage, HttpResponseMessage responseMessage )
+		{
+			if( responseMessage.IsSuccessStatusCode )
+				return;
+
+			switch( responseMessage.StatusCode )
+			{
+				case HttpStatusCode.Forbidden:
+					throw new AuthorizationException( responseMessage.ReasonPhrase );
+
+				case HttpStatusCode.Gone:
+					throw new UnknownResourceException( responseMessage );
+
+				case HttpStatusCode.Unauthorized:
+					throw new AuthenticationException();
+
+				case HttpStatusCode.BadGateway:
+					throw new HttpApiRequestException( responseMessage );
+
+				case HttpStatusCode.BadRequest:
+					throw new HttpApiRequestException( responseMessage );
+
+				case HttpStatusCode.NotFound:
+					throw new UnknownResourceException( responseMessage );
+
+				case HttpStatusCode.MethodNotAllowed:
+					throw new HttpApiRequestException(
+							new InvalidOperationException( $"{requestMessage.Method.ToString()} method not allowed on resource" ),
+							responseMessage
+						);
+
+				case HttpStatusCode.Conflict:
+					throw new HttpApiRequestException( "Possible authentication/authorization or resource conflict error", responseMessage );
+
+#if !NETSTANDARD
+				case HttpStatusCode.Locked:
+					throw new HttpApiRequestException(
+						new InvalidOperationException(
+							$"Resource cannot be modified: {responseMessage.StatusCode} ({responseMessage.ReasonPhrase})" ),
+						responseMessage );
+
+				case HttpStatusCode.InsufficientStorage:
+					throw new InternalServerErrorException( responseMessage );
+#endif
+
+				case HttpStatusCode.NotImplemented:
+					throw new HttpApiRequestException( new NotImplementedException(), responseMessage );
+
+				case HttpStatusCode.InternalServerError:
+					throw new InternalServerErrorException( responseMessage );
 			}
 		}
 		

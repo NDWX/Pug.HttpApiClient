@@ -44,7 +44,7 @@ namespace Pug.HttpApiClient
 
 		protected HttpApiRequestException( SerializationInfo info, StreamingContext context ) : base(info, context)
 		{
-			ResponseStatusCode = (HttpStatusCode)Convert.ToInt32( info.GetString( ResponseMessageFieldName ) );
+			ResponseStatusCode = (HttpStatusCode)Convert.ToInt32( info.GetString( ResponseStatusCodeFieldName ) );
 			ResponseStatusReason = info.GetString( ResponseStatusReasonFieldName );
 			ResponseMessage = info.GetString( ResponseMessageFieldName );
 		}
