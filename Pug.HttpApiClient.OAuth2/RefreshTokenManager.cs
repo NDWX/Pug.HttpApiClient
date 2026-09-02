@@ -129,14 +129,14 @@ namespace Pug.HttpApiClient.OAuth2
 
 		protected internal virtual async Task<AccessToken> GetAccessTokenAsync( FormUrlEncodedContent formUrlEncodedContent)
 		{
-			OpenIdConfiguration openIdConfiguration = await GetOpenIdConfigurationAsync();
+			OpenIdConfiguration openIdConfiguration = await GetOpenIdConfigurationAsync().ConfigureAwait( false );
 			HttpResponseMessage responseMessage;
 			try
 			{
 				IHttpApiClient httpApiClient = new HttpApiClient( openIdConfiguration.TokenEndpoint, HttpClientFactory );
 
 				responseMessage =
-					await httpApiClient.PostAsync( string.Empty, formUrlEncodedContent, _jsonMediaType, null, null );
+					await httpApiClient.PostAsync( string.Empty, formUrlEncodedContent, _jsonMediaType, null, null ).ConfigureAwait( false );
 			}
 			catch( TaskCanceledException )
 			{
@@ -156,11 +156,11 @@ namespace Pug.HttpApiClient.OAuth2
 				case HttpStatusCode.BadRequest:
 #if NETCOREAPP2_1 || NETSTANDARD
 					TokenRequestError tokenRequestError = JsonConvert.DeserializeObject<TokenRequestError>(
-							await responseMessage.Content.ReadAsStringAsync()
+							await responseMessage.Content.ReadAsStringAsync().ConfigureAwait( false )
 						);
 #else
 					TokenRequestError tokenRequestError = JsonSerializer.Deserialize<TokenRequestError>(
-							await responseMessage.Content.ReadAsStringAsync()
+							await responseMessage.Content.ReadAsStringAsync().ConfigureAwait( false )
 						);
 #endif
 					throw new AuthenticationException( tokenRequestError.Message );
@@ -170,7 +170,7 @@ namespace Pug.HttpApiClient.OAuth2
 					throw new HttpRequestException();
 
 				case HttpStatusCode.OK:
-					string tokenJson = await responseMessage.Content.ReadAsStringAsync();
+					string tokenJson = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait( false );
 #if NETCOREAPP2_1 || NETSTANDARD
 					return JsonConvert.DeserializeObject<AccessToken>( tokenJson );
 #else
@@ -212,7 +212,7 @@ namespace Pug.HttpApiClient.OAuth2
 					}
 				);
 
-			return await GetAccessTokenAsync( formUrlEncodedContent );
+			return await GetAccessTokenAsync( formUrlEncodedContent ).ConfigureAwait( false );
 		}
 	}
 }

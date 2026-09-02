@@ -8,26 +8,27 @@
 		<Title>Pug.HttpApiClient</Title>
 		<Authors>Andrian</Authors>
 		<Description>HTTP API client library</Description>
-		<AssemblyVersion>0.6.0.0</AssemblyVersion>
-		<FileVersion>0.6.0.0</FileVersion>
+		<AssemblyVersion>0.6.1</AssemblyVersion>
+		<FileVersion>0.6.1</FileVersion>
 		<RepositoryUrl>https://github.com/NDWX/Pug.HttpApiClient.git</RepositoryUrl>
 		<RepositoryType>Git</RepositoryType>
-		<PackageVersion>0.6.0</PackageVersion>
+		<PackageVersion>0.6.1</PackageVersion>
 		<PackageId>Pug.HttpApiClient</PackageId>
 		<PackageTags>Pug HTTP API Client Helpers</PackageTags>
 		<PackageLicenseExpression>AGPL-3.0-or-later</PackageLicenseExpression>
 		<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
 		<PackageReleaseNotes>
-			Replace NotAuthorized exception with AuthorizationException from Pug.Core package.
+			Replace NotAuthorized exception with AuthorizationException from Pug.Core package. 
+			Async calls no longer require continuation on original context.
 		</PackageReleaseNotes>
 	</PropertyGroup>
 
 	<PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-	  <DocumentationFile>bin\Debug\Pug.HttpApiClient.xml</DocumentationFile>
+	  <DocumentationFile>bin/Debug/Pug.HttpApiClient.xml</DocumentationFile>
 	</PropertyGroup>
 
 	<PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-	  <DocumentationFile>bin\Release\Pug.HttpApiClient.xml</DocumentationFile>
+	  <DocumentationFile>bin/Release/Pug.HttpApiClient.xml</DocumentationFile>
 	</PropertyGroup>
 
 	<ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
@@ -39,7 +40,7 @@
 	</ItemGroup>
 	
 	<ItemGroup>
-	  <ProjectReference Include="..\Pug.HttpApiClient.Common\Pug.HttpApiClient.Common.csproj" />
+	  <ProjectReference Include="../Pug.HttpApiClient.Common/Pug.HttpApiClient.Common.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

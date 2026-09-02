@@ -80,7 +80,7 @@ namespace Pug.HttpApiClient.OAuth2
 
 		public async Task<TToken> GetAccessTokenAsync()
 		{
-			await _accessTokenRequestSync.WaitAsync();
+			await _accessTokenRequestSync.WaitAsync().ConfigureAwait( false );
 
 			if( !NewAccessTokenRequired() )
 			{
@@ -93,7 +93,7 @@ namespace Pug.HttpApiClient.OAuth2
 
 			try
 			{
-				_accessToken = await GetNewAccessTokenAsync();
+				_accessToken = await GetNewAccessTokenAsync().ConfigureAwait( false );
 
 				_clientAccessTokenExpiryTimestamp = DateTime.Now.AddSeconds( _accessToken.ValidityPeriod - 5 );
 			}

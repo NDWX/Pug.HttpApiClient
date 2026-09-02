@@ -114,7 +114,7 @@ namespace Pug.HttpApiClient.OAuth2
 		{
 			HttpResponseMessage responseMessage;
 
-			OpenIdConfiguration openIdConfiguration = await GetOpenIdConfigurationAsync();
+			OpenIdConfiguration openIdConfiguration = await GetOpenIdConfigurationAsync().ConfigureAwait( false );
 			
 			try
 			{
@@ -125,7 +125,7 @@ namespace Pug.HttpApiClient.OAuth2
 					);
 				
 				responseMessage =
-					await httpApiClient.PostAsync( string.Empty, _clientTokenRequestContent, _jsonMediaType, null, null );
+					await httpApiClient.PostAsync( string.Empty, _clientTokenRequestContent, _jsonMediaType, null, null ).ConfigureAwait( false );
 
 			}
 			catch( TaskCanceledException )
@@ -146,11 +146,11 @@ namespace Pug.HttpApiClient.OAuth2
 				case HttpStatusCode.BadRequest:
 #if NETCOREAPP2_1 || NETSTANDARD
 					TokenRequestError tokenRequestError = JsonConvert.DeserializeObject<TokenRequestError>(
-							await responseMessage.Content.ReadAsStringAsync()
+							await responseMessage.Content.ReadAsStringAsync().ConfigureAwait( false )
 						);
 #else
 					TokenRequestError tokenRequestError = JsonSerializer.Deserialize<TokenRequestError>(
-							await responseMessage.Content.ReadAsStringAsync()
+							await responseMessage.Content.ReadAsStringAsync().ConfigureAwait( false )
 						);
 #endif
 
@@ -161,7 +161,7 @@ namespace Pug.HttpApiClient.OAuth2
 					throw new HttpRequestException();
 
 				case HttpStatusCode.OK:
-					string tokenJson = await responseMessage.Content.ReadAsStringAsync();
+					string tokenJson = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait( false );
 
 #if NETCOREAPP2_1 || NETSTANDARD
 					return JsonConvert.DeserializeObject<AccessToken>( tokenJson );

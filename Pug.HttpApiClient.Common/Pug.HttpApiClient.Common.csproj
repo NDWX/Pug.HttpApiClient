@@ -22,11 +22,11 @@
 	</PropertyGroup>
 
 	<PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-		<DocumentationFile>bin\Debug\Pug.HttpApiClient.Common.xml</DocumentationFile>
+		<DocumentationFile>bin/Debug/Pug.HttpApiClient.Common.xml</DocumentationFile>
 	</PropertyGroup>
 
 	<PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-		<DocumentationFile>bin\Release\Pug.HttpApiClient.Common.xml</DocumentationFile>
+		<DocumentationFile>bin/Release/Pug.HttpApiClient.Common.xml</DocumentationFile>
 	</PropertyGroup>
 
 	<ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">

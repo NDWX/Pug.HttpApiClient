@@ -137,11 +137,11 @@ namespace Pug.HttpApiClient
 																	HttpContent content = null )
 		{
 			// ReSharper disable once ConvertToUsingDeclaration
-			using( HttpClient client = await CreateHttpClientAsync() )
+			using( HttpClient client = await CreateHttpClientAsync().ConfigureAwait( false ) )
 			{
-				HttpRequestMessage requestMessage = await CreateRequestMessageAsync( httpMethod, path, queries, headers, mediaType, content );
+				HttpRequestMessage requestMessage = await CreateRequestMessageAsync( httpMethod, path, queries, headers, mediaType, content ).ConfigureAwait( false );
 
-				HttpResponseMessage responseMessage = await client.SendAsync( requestMessage );
+				HttpResponseMessage responseMessage = await client.SendAsync( requestMessage ).ConfigureAwait( false );
 
 				if( responseMessage.IsSuccessStatusCode )
 					return responseMessage;
@@ -215,7 +215,7 @@ namespace Pug.HttpApiClient
 																IDictionary<string, string> headers,
 																IDictionary<string, string> queries )
 		{
-			return await SendAsync( HttpMethod.Get, path, queries, headers, mediaType );
+			return await SendAsync( HttpMethod.Get, path, queries, headers, mediaType ).ConfigureAwait( false );
 		}
 
 		/// <summary>
@@ -236,7 +236,7 @@ namespace Pug.HttpApiClient
 																MediaTypeWithQualityHeaderValue mediaType, IDictionary<string, string> headers = null,
 																IDictionary<string, string> queries = null )
 		{
-			return await SendAsync( HttpMethod.Post, path, queries, headers, mediaType, content );
+			return await SendAsync( HttpMethod.Post, path, queries, headers, mediaType, content ).ConfigureAwait( false );
 		}
 
 		/// <summary>
@@ -257,7 +257,7 @@ namespace Pug.HttpApiClient
 																MediaTypeWithQualityHeaderValue mediaType, IDictionary<string, string> headers,
 																IDictionary<string, string> queries )
 		{
-			return await SendAsync( HttpMethod.Put, path, queries, headers, mediaType, content );
+			return await SendAsync( HttpMethod.Put, path, queries, headers, mediaType, content ).ConfigureAwait( false );
 		}
 
 		/// <summary>
@@ -278,7 +278,7 @@ namespace Pug.HttpApiClient
 																	IDictionary<string, string> queries = null,
 																	MediaTypeWithQualityHeaderValue mediaType = null )
 		{
-			return await SendAsync( HttpMethod.Delete, path, queries, headers, mediaType );
+			return await SendAsync( HttpMethod.Delete, path, queries, headers, mediaType ).ConfigureAwait( false );
 		}
 
 		/// <summary>
@@ -307,7 +307,7 @@ namespace Pug.HttpApiClient
 #else
 			httpMethod = HttpMethod.Patch;
 #endif
-			return await SendAsync(httpMethod, path, queries, headers, mediaType, content );
+			return await SendAsync(httpMethod, path, queries, headers, mediaType, content ).ConfigureAwait( false );
 		}
 	}
 }

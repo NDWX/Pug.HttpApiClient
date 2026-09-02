@@ -2,6 +2,7 @@
 using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 #if !NETSTANDARD
 using System.Net.Mime;
@@ -107,7 +108,7 @@ namespace Pug.HttpApiClient.Json
 				throw new HttpApiRequestException( response );
 
 #if NETCOREAPP2_1 || NETSTANDARD
-			using Stream contentStream = await response.Content.ReadAsStreamAsync();
+			using Stream contentStream = await response.Content.ReadAsStreamAsync().ConfigureAwait( false );
 			using StreamReader streamReader = new ( contentStream );
 
 			return CreateJsonSerializer( jsonSerializerSettings )
@@ -117,11 +118,12 @@ namespace Pug.HttpApiClient.Json
 											)
 									);
 #else
-			await using Stream contentStream = await response.Content.ReadAsStreamAsync();
+			Stream contentStream = await response.Content.ReadAsStreamAsync().ConfigureAwait( false );
+			await using ConfiguredAsyncDisposable stream = contentStream.ConfigureAwait( false );
 
 			return await JsonSerializer.DeserializeAsync<TResult>( 
 						contentStream, jsonSerializerOptions?? 
-										defaultJsonSerializerOptions );
+										defaultJsonSerializerOptions ).ConfigureAwait( false );
 #endif
 		}
 
@@ -154,12 +156,13 @@ namespace Pug.HttpApiClient.Json
 #endif
 			)
 		{
-			HttpResponseMessage response = await httpApiClient.GetAsync( path, MediaType, headers, queries );
+			HttpResponseMessage response = await httpApiClient.GetAsync( path, MediaType, headers, queries )
+															.ConfigureAwait( false );
 
 #if NETCOREAPP2_1 || NETSTANDARD 
-			return await CheckAndDeserializeAsync<T>( response, jsonSerializerSettings );
+			return await CheckAndDeserializeAsync<T>( response, jsonSerializerSettings ).ConfigureAwait( false );
 #else
-			return await CheckAndDeserializeAsync<T>( response, jsonSerializerOptions );
+			return await CheckAndDeserializeAsync<T>( response, jsonSerializerOptions ).ConfigureAwait( false );
 #endif
 		}
 
@@ -213,9 +216,10 @@ namespace Pug.HttpApiClient.Json
 		{
 			HttpContent httpContent = CreateHttpContent<TContent>( content, jsonSerializerSettings );
 
-			HttpResponseMessage response = await httpApiClient.PostAsync( path, httpContent, MediaType, headers, queries );
+			HttpResponseMessage response = await httpApiClient.PostAsync( path, httpContent, MediaType, headers, queries )
+															.ConfigureAwait( false );
 
-			return await CheckAndDeserializeAsync<TResult>( response, jsonSerializerSettings );
+			return await CheckAndDeserializeAsync<TResult>( response, jsonSerializerSettings ).ConfigureAwait( false );
 
 		}
 #else
@@ -244,9 +248,9 @@ namespace Pug.HttpApiClient.Json
 		{
 			HttpContent httpContent = CreateHttpContent<TContent>( content, jsonSerializerOptions );
 
-			HttpResponseMessage response = await httpApiClient.PostAsync( path, httpContent, MediaType, headers, queries );
+			HttpResponseMessage response = await httpApiClient.PostAsync( path, httpContent, MediaType, headers, queries ).ConfigureAwait( false );
 
-			return await CheckAndDeserializeAsync<TResult>( response, jsonSerializerOptions );
+			return await CheckAndDeserializeAsync<TResult>( response, jsonSerializerOptions ).ConfigureAwait( false );
 		}
 #endif
 
@@ -307,12 +311,12 @@ namespace Pug.HttpApiClient.Json
 		{
 			HttpContent httpContent = CreateHttpContent<TContent>( content );
 
-			HttpResponseMessage response = await httpApiClient.PutAsync( path, httpContent, MediaType, headers, queries );
+			HttpResponseMessage response = await httpApiClient.PutAsync( path, httpContent, MediaType, headers, queries ).ConfigureAwait( false );
 
 #if NETCOREAPP2_1 || NETSTANDARD 
-			return await CheckAndDeserializeAsync<TResult>( response, jsonSerializerSettings );
+			return await CheckAndDeserializeAsync<TResult>( response, jsonSerializerSettings ).ConfigureAwait( false );
 #else
-			return await CheckAndDeserializeAsync<TResult>( response, jsonSerializerOptions );
+			return await CheckAndDeserializeAsync<TResult>( response, jsonSerializerOptions ).ConfigureAwait( false );
 #endif
 		}
 
@@ -373,12 +377,12 @@ namespace Pug.HttpApiClient.Json
 		{
 			HttpContent httpContent = CreateHttpContent<TContent>( content );
 
-			HttpResponseMessage response = await httpApiClient.PatchAsync( path, httpContent, MediaType, headers, queries );
+			HttpResponseMessage response = await httpApiClient.PatchAsync( path, httpContent, MediaType, headers, queries ).ConfigureAwait( false );
 
 #if NETCOREAPP2_1 || NETSTANDARD 
-			return await CheckAndDeserializeAsync<TResult>( response, jsonSerializerSettings );
+			return await CheckAndDeserializeAsync<TResult>( response, jsonSerializerSettings ).ConfigureAwait( false );
 #else
-			return await CheckAndDeserializeAsync<TResult>( response, jsonSerializerOptions );
+			return await CheckAndDeserializeAsync<TResult>( response, jsonSerializerOptions ).ConfigureAwait( false );
 #endif
 		}
 	}
